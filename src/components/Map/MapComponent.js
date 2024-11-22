@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { fetchIncidents, createIncident, deleteIncident } from '../../services/api';
 
 const INCIDENT_TYPES = {
   COLLISION: {
@@ -147,9 +148,9 @@ const DrawingComponent = ({ onAddPoint, drawingMode, selectedIncidentType }) => 
 };
 
 const MapComponent = () => {
+  const [incidents, setIncidents] = useState([]);
   const [drawingMode, setDrawingMode] = useState(false);
   const [currentPath, setCurrentPath] = useState([]);
-  const [incidents, setIncidents] = useState([]);
   const [selectedIncidentType, setSelectedIncidentType] = useState('COLLISION');
   const [description, setDescription] = useState('');
   const [selectedIncident, setSelectedIncident] = useState(null);
@@ -158,31 +159,21 @@ const MapComponent = () => {
   const [durationUnit, setDurationUnit] = useState('HOURS');
   const [expiryDate, setExpiryDate] = useState('');
 
-  // Load incidents from localStorage on component mount
   useEffect(() => {
-    const savedIncidents = localStorage.getItem('incidents');
-    if (savedIncidents) {
-      setIncidents(JSON.parse(savedIncidents));
-    }
+    const loadIncidents = async () => {
+      try {
+        const data = await fetchIncidents();
+        setIncidents(data);
+      } catch (error) {
+        console.error('Error loading incidents:', error);
+      }
+    };
+
+    loadIncidents();
+    const interval = setInterval(loadIncidents, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
   }, []);
-
-  // Save incidents to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('incidents', JSON.stringify(incidents));
-  }, [incidents]);
-
-  // Clean up expired incidents
-  useEffect(() => {
-    const now = new Date().getTime();
-    const activeIncidents = incidents.filter(incident => {
-      const expiryTime = new Date(incident.expiryTime).getTime();
-      return expiryTime > now;
-    });
-    
-    if (activeIncidents.length !== incidents.length) {
-      setIncidents(activeIncidents);
-    }
-  }, [incidents]);
 
   const calculateExpiryTime = () => {
     if (expiryType === 'date') {
@@ -213,7 +204,7 @@ const MapComponent = () => {
     setCurrentPath(prevPath => [...prevPath, point]);
   };
 
-  const handleDrawingComplete = () => {
+  const handleDrawingComplete = async () => {
     if (currentPath.length > 0) {
       const newIncident = {
         id: Date.now(),
@@ -226,8 +217,13 @@ const MapComponent = () => {
         durationUnit: expiryType === 'duration' ? durationUnit : null
       };
 
-      setIncidents([...incidents, newIncident]);
-      resetForm();
+      try {
+        const savedIncident = await createIncident(newIncident);
+        setIncidents(prev => [...prev, savedIncident]);
+        resetForm();
+      } catch (error) {
+        console.error('Error saving incident:', error);
+      }
     }
   };
 
@@ -241,12 +237,17 @@ const MapComponent = () => {
     setSelectedIncident(null);
   };
 
-  const handleDeleteIncident = (id) => {
-    setIncidents(incidents.filter(incident => incident.id !== id));
-    setSelectedIncident(null);
+  const handleDeleteIncident = async (id) => {
+    try {
+      await deleteIncident(id);
+      setIncidents(incidents.filter(incident => incident.id !== id));
+      setSelectedIncident(null);
+    } catch (error) {
+      console.error('Error deleting incident:', error);
+    }
   };
 
-  const handleUpdateIncident = (id) => {
+  const handleUpdateIncident = async (id) => {
     const updatedIncidents = incidents.map(incident => {
       if (incident.id === id) {
         return {
@@ -260,8 +261,13 @@ const MapComponent = () => {
       return incident;
     });
     
-    setIncidents(updatedIncidents);
-    resetForm();
+    try {
+      await Promise.all(updatedIncidents.map(incident => createIncident(incident)));
+      setIncidents(updatedIncidents);
+      resetForm();
+    } catch (error) {
+      console.error('Error updating incidents:', error);
+    }
   };
 
   const renderIncidentMarkers = (path, type, isSelected = false) => {
