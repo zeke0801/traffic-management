@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import './MapComponent.css';
 import { fetchIncidents, createIncident, deleteIncident } from '../../services/api';
 
 const INCIDENT_TYPES = {
@@ -158,20 +159,26 @@ const MapComponent = () => {
   const [duration, setDuration] = useState('');
   const [durationUnit, setDurationUnit] = useState('HOURS');
   const [expiryDate, setExpiryDate] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const loadIncidents = async () => {
+    const fetchData = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const data = await fetchIncidents();
         setIncidents(data);
       } catch (error) {
-        console.error('Error loading incidents:', error);
+        console.error('Error fetching incidents:', error);
+        setError('Failed to load incidents. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadIncidents();
-    const interval = setInterval(loadIncidents, 5000); // Refresh every 5 seconds
-
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -206,19 +213,24 @@ const MapComponent = () => {
 
   const handleDrawingComplete = async () => {
     if (currentPath.length > 0) {
-      const newIncident = {
-        type: selectedIncidentType,
-        coordinates: currentPath,
-        description: INCIDENT_TYPES[selectedIncidentType].description,
-        expiryTime: calculateExpiryTime()
-      };
-
       try {
+        setLoading(true);
+        setError(null);
+        const newIncident = {
+          type: selectedIncidentType,
+          coordinates: currentPath,
+          description: INCIDENT_TYPES[selectedIncidentType].description,
+          expiryTime: calculateExpiryTime()
+        };
+
         const savedIncident = await createIncident(newIncident);
         setIncidents(prev => [...prev, savedIncident]);
         resetForm();
       } catch (error) {
         console.error('Error saving incident:', error);
+        setError('Failed to save incident. Please try again.');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -235,11 +247,16 @@ const MapComponent = () => {
 
   const handleDeleteIncident = async (id) => {
     try {
+      setLoading(true);
+      setError(null);
       await deleteIncident(id);
-      setIncidents(incidents.filter(incident => incident.id !== id));
+      setIncidents(incidents.filter(incident => incident._id !== id));
       setSelectedIncident(null);
     } catch (error) {
       console.error('Error deleting incident:', error);
+      setError('Failed to delete incident. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -417,6 +434,16 @@ const MapComponent = () => {
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
       >
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+        {loading && (
+          <div className="loading-spinner">
+            Loading...
+          </div>
+        )}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

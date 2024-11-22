@@ -1,0 +1,117 @@
+.client-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.map-section {
+  flex: 1;
+  height: 100%;
+  position: relative;
+}
+
+.incidents-list {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f5f5f5;
+  padding: 20px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.incidents-list h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.incidents-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.incident-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.incident-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.incident-card.selected {
+  border: 2px solid #007bff;
+}
+
+.incident-type {
+  padding: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.incident-details {
+  padding: 15px;
+}
+
+.incident-description {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.incident-expiry {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.list-loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.list-error {
+  text-align: center;
+  padding: 20px;
+  color: #ff4444;
+  background-color: #ffe5e5;
+  border-radius: 4px;
+}
+
+.no-incidents {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.error-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ff4444;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.loading-spinner {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px 20px;
+  border-radius: 4px;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
