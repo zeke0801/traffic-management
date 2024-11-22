@@ -2,11 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const DrawingModes = {
-  BRUSH: 'BRUSH',
-  LINE: 'LINE'
-};
-
 const INCIDENT_TYPES = {
   COLLISION: {
     name: 'Collision',
