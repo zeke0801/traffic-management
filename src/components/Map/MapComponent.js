@@ -207,14 +207,10 @@ const MapComponent = () => {
   const handleDrawingComplete = async () => {
     if (currentPath.length > 0) {
       const newIncident = {
-        id: Date.now(),
         type: selectedIncidentType,
-        path: currentPath,
-        description,
-        timestamp: new Date().toISOString(),
-        expiryTime: calculateExpiryTime(),
-        durationValue: expiryType === 'duration' ? duration : null,
-        durationUnit: expiryType === 'duration' ? durationUnit : null
+        coordinates: currentPath,
+        description: INCIDENT_TYPES[selectedIncidentType].description,
+        expiryTime: calculateExpiryTime()
       };
 
       try {
@@ -434,7 +430,7 @@ const MapComponent = () => {
         
         {currentPath.length > 0 && renderIncidentMarkers(currentPath, selectedIncidentType, true)}
 
-        {incidents.map((incident, index) => renderIncidentMarkers(incident.path, incident.type))}
+        {incidents.map((incident, index) => renderIncidentMarkers(incident.coordinates, incident.type))}
         
         <div className="map-legend">
           <h4>Incident Legend</h4>
