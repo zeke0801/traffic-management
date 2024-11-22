@@ -1,13 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { MapContainer, TileLayer, useMap, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const DRAWING_MODES = {
-  BRUSH: {
-    id: 'BRUSH',
-    label: 'Brush',
-    description: 'Draw with diagonal shading'
-  }
+const DrawingModes = {
+  BRUSH: 'BRUSH',
+  LINE: 'LINE'
 };
 
 const INCIDENT_TYPES = {
