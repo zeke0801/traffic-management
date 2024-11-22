@@ -6,9 +6,17 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Startup logging
 console.log('Starting server...');
 console.log('Environment:', process.env.NODE_ENV);
+console.log('Port:', PORT);
 console.log('MongoDB URI exists:', !!process.env.MONGODB_URI);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  res.status(500).json({ error: 'Internal Server Error', details: err.message });
+});
 
 // Middleware
 app.use(cors());
@@ -16,7 +24,11 @@ app.use(express.json());
 
 // Basic root endpoint
 app.get('/', (req, res) => {
-  res.json({ message: 'Traffic Management API is running' });
+  res.json({ 
+    message: 'Traffic Management API is running',
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // Health Check endpoint
@@ -78,20 +90,36 @@ app.delete('/api/incidents/:id', async (req, res) => {
   }
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
+// Start server function
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
     console.log('Connected to MongoDB');
-    app.listen(PORT, () => {
+    
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
       console.log(`Health check available at: http://localhost:${PORT}/health`);
     });
-  })
-  .catch((error) => {
-    console.error('MongoDB connection error:', error);
-    // Don't exit the process, just log the error
-    console.log('Server starting without MongoDB connection...');
-    app.listen(PORT, () => {
+  } catch (error) {
+    console.error('Server startup error:', error);
+    // Start server even if MongoDB fails
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT} (without MongoDB)`);
     });
-  });
+  }
+};
+
+// Handle process errors
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('Unhandled Rejection:', error);
+});
+
+// Start the server
+startServer();
