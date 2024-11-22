@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, CircleMarker, useMapEvents, ZoomControl, Polyline } from 'react-leaflet';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { MapContainer, TileLayer, useMap, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
 const DRAWING_MODES = {
   BRUSH: {
