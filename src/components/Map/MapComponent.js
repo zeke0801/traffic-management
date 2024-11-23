@@ -91,7 +91,6 @@ const Clock = () => {
 
 const MapComponent = () => {
   const [incidents, setIncidents] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPath, setCurrentPath] = useState([]);
   const [selectedIncidentType, setSelectedIncidentType] = useState('');
@@ -105,7 +104,6 @@ const MapComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         setError(null);
         const data = await fetchIncidents();
         setIncidents(data);
@@ -117,8 +115,6 @@ const MapComponent = () => {
             <span className="error-retry">Please try again later.</span>
           </div>
         );
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -144,7 +140,6 @@ const MapComponent = () => {
     if (currentPath.length === 0) return;
 
     try {
-      setLoading(true);
       setError(null);
 
       const expiryTime = calculateExpiryTime();
@@ -171,14 +166,11 @@ const MapComponent = () => {
     } catch (err) {
       setError('Failed to create incident. Please try again.');
       console.error('Error creating incident:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleDeleteIncident = async (incidentId) => {
     try {
-      setLoading(true);
       setError(null);
       await deleteIncident(incidentId);
       const updatedIncidents = await fetchIncidents();
@@ -187,8 +179,6 @@ const MapComponent = () => {
     } catch (err) {
       setError('Failed to delete incident. Please try again.');
       console.error('Error deleting incident:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
