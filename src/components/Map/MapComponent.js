@@ -244,29 +244,20 @@ const MapComponent = () => {
     }
   };
 
-  const handleDeleteIncident = async (id) => {
+  const handleDeleteIncident = async (incidentId) => {
     try {
       setLoading(true);
       setError(null);
-      await deleteIncident(id);
-      setIncidents(incidents.filter(incident => incident._id !== id));
-    } catch (error) {
-      console.error('Error deleting incident:', error);
+      await deleteIncident(incidentId);
+      const updatedIncidents = await fetchIncidents();
+      setIncidents(updatedIncidents);
+      setSelectedIncident(null);
+    } catch (err) {
       setError('Failed to delete incident. Please try again.');
+      console.error('Error deleting incident:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetForm = () => {
-    setCurrentPath([]);
-    setDescription('');
-    setDrawingMode(false);
-    setSelectedIncident(null);
-    setDuration(1);
-    setDurationUnit(DURATION_UNITS.HOURS);
-    setExpiryType('duration');
-    setExpiryDate('');
   };
 
   const renderIncidentMarkers = (coordinates, type, isDrawing = false) => {
@@ -279,15 +270,14 @@ const MapComponent = () => {
             key={`${isDrawing ? 'drawing' : 'incident'}-${index}`}
             center={point}
             radius={5}
-            pathOptions={{ color }}
+            pathOptions={{
+              fillColor: color,
+              fillOpacity: 0.7,
+              color: color,
+              weight: 1
+            }}
           />
         ))}
-        {coordinates.length > 1 && (
-          <Polyline
-            positions={coordinates}
-            pathOptions={{ color }}
-          />
-        )}
       </>
     );
   };
