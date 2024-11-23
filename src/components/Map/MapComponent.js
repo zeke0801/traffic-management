@@ -6,123 +6,56 @@ import { fetchIncidents, createIncident, deleteIncident } from '../../services/a
 import { INCIDENT_TYPES, DURATION_UNITS } from '../../constants/incidentTypes';
 import ActiveIncidentsList from '../Incidents/ActiveIncidentsList';
 
-const DrawingComponent = ({ onAddPoint, drawingMode, selectedIncidentType }) => {
-  const [isDrawing, setIsDrawing] = useState(false);
+const DrawingComponent = ({ onAddPoint, selectedIncidentType }) => {
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const mapRef = useRef(null);
-  const brushSize = 0.0005;
-  const lastPointRef = useRef(null);
-  
-  const isLineDrawing = selectedIncidentType === 'COLLISION' || selectedIncidentType === 'CONSTRUCTION' || selectedIncidentType === 'DETOUR';
+
+  const map = useMapEvents({
+    click(e) {
+      if (!isSpacePressed) {
+        onAddPoint(e.latlng);
+      }
+    },
+    mousedown(e) {
+      if (isSpacePressed) {
+        mapRef.current = e.originalEvent;
+        map.dragging.enable();
+      }
+    },
+    mouseup() {
+      if (isSpacePressed) {
+        map.dragging.disable();
+      }
+    }
+  });
 
   useEffect(() => {
-    const preventSelection = (e) => {
-      if (isDrawing || drawingMode) {
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener('selectstart', preventSelection);
-    document.addEventListener('dragstart', preventSelection);
-    
     const handleKeyDown = (e) => {
-      if (e.code === 'Space' && !isSpacePressed) {
+      if (e.code === 'Space') {
         setIsSpacePressed(true);
-        if (mapRef.current) {
-          mapRef.current.dragging.enable();
-        }
+        map.dragging.enable();
       }
     };
 
     const handleKeyUp = (e) => {
       if (e.code === 'Space') {
         setIsSpacePressed(false);
-        if (mapRef.current && !isDrawing) {
-          mapRef.current.dragging.disable();
-        }
+        map.dragging.disable();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
+    map.dragging.disable();
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      document.removeEventListener('selectstart', preventSelection);
-      document.removeEventListener('dragstart', preventSelection);
+      map.dragging.enable();
     };
-  }, [isSpacePressed, isDrawing, drawingMode]);
-
-  const createSprayPoints = (centerPoint) => {
-    const points = [];
-    const numPoints = 5;
-    
-    for (let i = 0; i < numPoints; i++) {
-      const angle = (i / numPoints) * Math.PI * 2;
-      const randomRadius = Math.random() * brushSize;
-      const point = [
-        centerPoint[0] + Math.cos(angle) * randomRadius,
-        centerPoint[1] + Math.sin(angle) * randomRadius
-      ];
-      points.push(point);
-    }
-    
-    return points;
-  };
-
-  const handleDrawing = (latlng) => {
-    const point = [latlng.lat, latlng.lng];
-    
-    if (isLineDrawing) {
-      // For traffic, construction, and detour, just add the point for line drawing
-      onAddPoint(latlng);
-      lastPointRef.current = point;
-    } else {
-      // For natural disaster, use spray brush
-      const sprayPoints = createSprayPoints(point);
-      sprayPoints.forEach(p => onAddPoint({ lat: p[0], lng: p[1] }));
-    }
-  };
-
-  const map = useMapEvents({
-    mousedown: (e) => {
-      if (drawingMode && !isSpacePressed) {
-        setIsDrawing(true);
-        handleDrawing(e.latlng);
-        map.dragging.disable();
-      }
-    },
-    mouseup: () => {
-      if (isDrawing) {
-        setIsDrawing(false);
-        lastPointRef.current = null;
-        if (isSpacePressed) {
-          map.dragging.enable();
-        }
-      }
-    },
-    mousemove: (e) => {
-      if (drawingMode && isDrawing && !isSpacePressed) {
-        handleDrawing(e.latlng);
-      }
-    },
-    click: (e) => {
-      // Add extra click handler for line drawing to make it easier to create straight lines
-      if (drawingMode && isLineDrawing && !isSpacePressed) {
-        handleDrawing(e.latlng);
-      }
-    }
-  });
-
-  mapRef.current = map;
-
-  useEffect(() => {
-    if (map && !isSpacePressed) {
-      map.dragging.disable();
-    }
   }, [map, isSpacePressed]);
-  
+
   return null;
 };
 
@@ -160,7 +93,6 @@ const MapComponent = () => {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [drawingMode, setDrawingMode] = useState(false);
   const [currentPath, setCurrentPath] = useState([]);
   const [selectedIncidentType, setSelectedIncidentType] = useState('');
   const [description, setDescription] = useState('');
@@ -302,7 +234,6 @@ const MapComponent = () => {
             <ZoomControl position="bottomleft" />
             <DrawingComponent
               onAddPoint={handleAddPoint}
-              drawingMode={drawingMode}
               selectedIncidentType={selectedIncidentType}
             />
             {currentPath.length > 0 && (
@@ -402,8 +333,6 @@ const MapComponent = () => {
           <Clock />
           <ActiveIncidentsList
             incidents={incidents}
-            loading={loading}
-            error={error}
             selectedIncident={selectedIncident}
             onSelectIncident={setSelectedIncident}
             onDeleteIncident={handleDeleteIncident}

@@ -5,8 +5,6 @@ import './ActiveIncidentsList.css';
 
 const ActiveIncidentsList = ({ 
   incidents, 
-  loading, 
-  error, 
   selectedIncident, 
   onSelectIncident,
   onDeleteIncident 
