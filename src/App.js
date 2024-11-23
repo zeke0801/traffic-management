@@ -11,16 +11,12 @@ function App() {
       <Routes>
         <Route path="/" element={
           <div>
-            <nav className="nav-links">
-              <Link to="/master">Master View</Link>
-              <Link to="/client">Client View</Link>
-            </nav>
             <div className="welcome-screen">
               <h1>Traffic Alert System - Naga City</h1>
               <p>Choose your view:</p>
               <div className="view-buttons">
-                <Link to="/master" className="view-button master">Master View</Link>
-                <Link to="/client" className="view-button client">Client View</Link>
+                <Link to="/master" className="view-button master">CeSAR Client</Link>
+                <Link to="/client" className="view-button client">Public View</Link>
               </div>
             </div>
           </div>

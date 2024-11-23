@@ -1,90 +1,90 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, ZoomControl } from 'react-leaflet';
+import React, { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, ZoomControl, GeoJSON, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './ClientMapComponent.css';
 import { fetchIncidents } from '../../services/api';
+import { INCIDENT_TYPES } from '../../constants/incidentTypes';
+import ActiveIncidentsList from '../Incidents/ActiveIncidentsList';
+import IncidentLegend from '../Incidents/IncidentLegend';
 
-const INCIDENT_TYPES = {
-  COLLISION: {
-    name: 'Collision',
-    color: '#FF0000',
-    description: 'Vehicle collision or accident'
-  },
-  CONSTRUCTION: {
-    name: 'Construction',
-    color: '#FFA500',
-    description: 'Road construction or maintenance'
-  },
-  NATURAL_DISASTER: {
-    name: 'Natural Disaster',
-    color: '#800080',
-    description: 'Natural disaster affecting traffic'
-  }
+const MapControls = () => {
+  const [isSpacePressed, setIsSpacePressed] = useState(false);
+  const mapRef = useRef(null);
+
+  const map = useMapEvents({
+    load: () => {
+      mapRef.current = map;
+    }
+  });
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.code === 'Space' && !isSpacePressed) {
+        setIsSpacePressed(true);
+        if (mapRef.current) {
+          mapRef.current.dragging.enable();
+        }
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.code === 'Space') {
+        setIsSpacePressed(false);
+        if (mapRef.current) {
+          mapRef.current.dragging.disable();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    if (mapRef.current) {
+      mapRef.current.dragging.disable();
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [isSpacePressed]);
+
+  return null;
 };
 
 const ClientMapComponent = () => {
   const [incidents, setIncidents] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedIncident, setSelectedIncident] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchIncidents();
-        setIncidents(data);
-      } catch (error) {
-        console.error('Error fetching incidents:', error);
-        setError('Failed to load incidents. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-    const interval = setInterval(fetchData, 5000);
+    const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const calculateTimeRemaining = (expiryTime) => {
-    const now = new Date();
-    const expiry = new Date(expiryTime);
-    const diff = expiry - now;
-
-    if (diff <= 0) return 'Expired';
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m remaining`;
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await fetchIncidents();
+      setIncidents(data);
+    } catch (error) {
+      console.error('Error fetching incidents:', error);
+      setError(
+        <div>
+          <span>Failed to load incidents</span>
+          <span className="error-retry">Please try again later.</span>
+        </div>
+      );
+    } finally {
+      setLoading(false);
     }
-    return `${minutes}m remaining`;
   };
 
-  const renderIncidentMarkers = (coordinates, type) => {
-    const color = INCIDENT_TYPES[type]?.color || '#000000';
-    
-    return (
-      <>
-        {coordinates.map((point, index) => (
-          <CircleMarker
-            key={index}
-            center={point}
-            radius={5}
-            pathOptions={{ color }}
-          />
-        ))}
-        {coordinates.length > 1 && (
-          <Polyline
-            positions={coordinates}
-            pathOptions={{ color }}
-          />
-        )}
-      </>
-    );
+  const getIncidentColor = (type) => {
+    return INCIDENT_TYPES[type]?.color || '#999';
   };
 
   return (
@@ -97,49 +97,47 @@ const ClientMapComponent = () => {
           zoomControl={false}
         >
           {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
-          {loading && (
-            <div className="loading-spinner">
-              Loading...
-            </div>
+            <div className="error-message">{error}</div>
           )}
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           <ZoomControl position="bottomleft" />
+          <MapControls />
+          {incidents.map((incident) => (
+            <GeoJSON
+              key={incident._id}
+              data={{
+                type: 'LineString',
+                coordinates: incident.coordinates
+              }}
+              style={() => ({
+                color: getIncidentColor(incident.type),
+                weight: 3,
+                opacity: 0.7,
+              })}
+            />
+          ))}
           
-          {incidents.map((incident) => renderIncidentMarkers(incident.coordinates, incident.type))}
+          <IncidentLegend />
         </MapContainer>
       </div>
 
-      <div className="incidents-list">
-        <h2>Active Incidents</h2>
-        {loading && <div className="list-loading">Loading incidents...</div>}
-        {error && <div className="list-error">{error}</div>}
-        {!loading && !error && incidents.length === 0 && (
-          <div className="no-incidents">No active incidents</div>
-        )}
-        <div className="incidents-grid">
-          {incidents.map((incident) => (
-            <div 
-              key={incident._id} 
-              className={`incident-card ${selectedIncident === incident._id ? 'selected' : ''}`}
-              onClick={() => setSelectedIncident(incident._id)}
-            >
-              <div className="incident-type" style={{ backgroundColor: INCIDENT_TYPES[incident.type].color }}>
-                {INCIDENT_TYPES[incident.type].name}
-              </div>
-              <div className="incident-details">
-                <p className="incident-description">{incident.description}</p>
-                <p className="incident-expiry">{calculateTimeRemaining(incident.expiryTime)}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="incidents-section">
+        <h3>Active Incidents</h3>
+        <ActiveIncidentsList 
+          incidents={incidents}
+          loading={loading}
+          error={error}
+          selectedIncident={selectedIncident}
+          onSelectIncident={setSelectedIncident}
+        />
+      </div>
+      <div className="map-instructions">
+        <span className="instruction-text">
+          Hold <kbd>Space</kbd> + Mouse to drag the map
+        </span>
       </div>
     </div>
   );

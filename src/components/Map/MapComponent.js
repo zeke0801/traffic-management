@@ -1,31 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapComponent.css';
 import { fetchIncidents, createIncident, deleteIncident } from '../../services/api';
-
-const INCIDENT_TYPES = {
-  COLLISION: {
-    name: 'Collision',
-    color: '#FF0000',
-    description: 'Traffic Accident'
-  },
-  CONSTRUCTION: {
-    name: 'Construction',
-    color: '#FF8C00',
-    description: 'Road Work'
-  },
-  NATURAL_DISASTER: {
-    name: 'Natural Disaster',
-    color: '#800080',
-    description: 'Natural Calamity'
-  }
-};
+import { INCIDENT_TYPES } from '../../constants/incidentTypes';
+import ActiveIncidentsList from '../Incidents/ActiveIncidentsList';
 
 const DURATION_UNITS = {
   HOURS: 'hours',
-  DAYS: 'days',
-  WEEKS: 'weeks'
+  DAYS: 'days'
 };
 
 const DrawingComponent = ({ onAddPoint, drawingMode, selectedIncidentType }) => {
@@ -35,7 +18,7 @@ const DrawingComponent = ({ onAddPoint, drawingMode, selectedIncidentType }) => 
   const brushSize = 0.0005;
   const lastPointRef = useRef(null);
   
-  const isLineDrawing = selectedIncidentType === 'COLLISION' || selectedIncidentType === 'CONSTRUCTION';
+  const isLineDrawing = selectedIncidentType === 'COLLISION' || selectedIncidentType === 'CONSTRUCTION' || selectedIncidentType === 'DETOUR';
 
   useEffect(() => {
     const preventSelection = (e) => {
@@ -97,13 +80,13 @@ const DrawingComponent = ({ onAddPoint, drawingMode, selectedIncidentType }) => 
     const point = [latlng.lat, latlng.lng];
     
     if (isLineDrawing) {
-      // For traffic and construction, just add the point for line drawing
-      onAddPoint(point);
+      // For traffic, construction, and detour, just add the point for line drawing
+      onAddPoint(latlng);
       lastPointRef.current = point;
     } else {
       // For natural disaster, use spray brush
       const sprayPoints = createSprayPoints(point);
-      sprayPoints.forEach(p => onAddPoint(p));
+      sprayPoints.forEach(p => onAddPoint({ lat: p[0], lng: p[1] }));
     }
   };
 
@@ -150,17 +133,17 @@ const DrawingComponent = ({ onAddPoint, drawingMode, selectedIncidentType }) => 
 
 const MapComponent = () => {
   const [incidents, setIncidents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [drawingMode, setDrawingMode] = useState(false);
   const [currentPath, setCurrentPath] = useState([]);
   const [selectedIncidentType, setSelectedIncidentType] = useState('COLLISION');
   const [description, setDescription] = useState('');
   const [selectedIncident, setSelectedIncident] = useState(null);
-  const [expiryType, setExpiryType] = useState('DURATION');
-  const [duration, setDuration] = useState('');
-  const [durationUnit, setDurationUnit] = useState('HOURS');
+  const [duration, setDuration] = useState(1);
+  const [durationUnit, setDurationUnit] = useState(DURATION_UNITS.HOURS);
+  const [expiryType, setExpiryType] = useState('duration');
   const [expiryDate, setExpiryDate] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -171,7 +154,12 @@ const MapComponent = () => {
         setIncidents(data);
       } catch (error) {
         console.error('Error fetching incidents:', error);
-        setError('Failed to load incidents. Please try again later.');
+        setError(
+          <div>
+            <span>Failed to load incidents</span>
+            <span className="error-retry">Please try again later.</span>
+          </div>
+        );
       } finally {
         setLoading(false);
       }
@@ -182,67 +170,50 @@ const MapComponent = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const calculateExpiryTime = () => {
-    if (expiryType === 'date') {
-      return new Date(expiryDate).toISOString();
-    }
-
-    const now = new Date();
-    const value = parseInt(duration);
-    
-    switch(durationUnit) {
-      case DURATION_UNITS.HOURS:
-        now.setHours(now.getHours() + value);
-        break;
-      case DURATION_UNITS.DAYS:
-        now.setDate(now.getDate() + value);
-        break;
-      case DURATION_UNITS.WEEKS:
-        now.setDate(now.getDate() + (value * 7));
-        break;
-      default:
-        break;
-    }
-    
-    return now.toISOString();
-  };
-
-  const handleAddPoint = (point) => {
-    setCurrentPath(prevPath => [...prevPath, point]);
+  const handleAddPoint = (latlng) => {
+    setCurrentPath([...currentPath, [latlng.lat, latlng.lng]]);
   };
 
   const handleDrawingComplete = async () => {
-    if (currentPath.length > 0) {
-      try {
-        setLoading(true);
-        setError(null);
-        const newIncident = {
-          type: selectedIncidentType,
-          coordinates: currentPath,
-          description: INCIDENT_TYPES[selectedIncidentType].description,
-          expiryTime: calculateExpiryTime()
-        };
-
-        const savedIncident = await createIncident(newIncident);
-        setIncidents(prev => [...prev, savedIncident]);
-        resetForm();
-      } catch (error) {
-        console.error('Error saving incident:', error);
-        setError('Failed to save incident. Please try again.');
-      } finally {
-        setLoading(false);
-      }
+    if (currentPath.length === 0) {
+      setError('Please draw a path first');
+      return;
     }
-  };
 
-  const resetForm = () => {
-    setCurrentPath([]);
-    setDrawingMode(false);
-    setDescription('');
-    setDuration('1');
-    setDurationUnit(DURATION_UNITS.HOURS);
-    setExpiryDate('');
-    setSelectedIncident(null);
+    if (!description) {
+      setError('Please enter a description');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      let expiryTime;
+      if (expiryType === 'duration') {
+        const now = new Date();
+        const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
+        expiryTime = new Date(now.getTime() + hours * 60 * 60 * 1000);
+      } else {
+        expiryTime = new Date(expiryDate);
+      }
+
+      await createIncident({
+        type: selectedIncidentType,
+        coordinates: currentPath,
+        description,
+        expiryTime: expiryTime.toISOString(),
+        durationValue: expiryType === 'duration' ? duration : null,
+        durationUnit: expiryType === 'duration' ? durationUnit : null,
+      });
+
+      resetForm();
+    } catch (error) {
+      console.error('Error creating incident:', error);
+      setError('Failed to create incident. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteIncident = async (id) => {
@@ -251,7 +222,6 @@ const MapComponent = () => {
       setError(null);
       await deleteIncident(id);
       setIncidents(incidents.filter(incident => incident._id !== id));
-      setSelectedIncident(null);
     } catch (error) {
       console.error('Error deleting incident:', error);
       setError('Failed to delete incident. Please try again.');
@@ -260,67 +230,48 @@ const MapComponent = () => {
     }
   };
 
-  const handleUpdateIncident = async (id) => {
-    const updatedIncidents = incidents.map(incident => {
-      if (incident.id === id) {
-        return {
-          ...incident,
-          description,
-          expiryTime: calculateExpiryTime(),
-          durationValue: expiryType === 'duration' ? duration : null,
-          durationUnit: expiryType === 'duration' ? durationUnit : null
-        };
-      }
-      return incident;
-    });
+  const resetForm = () => {
+    setCurrentPath([]);
+    setDescription('');
+    setDrawingMode(false);
+    setSelectedIncident(null);
+    setDuration(1);
+    setDurationUnit(DURATION_UNITS.HOURS);
+    setExpiryType('duration');
+    setExpiryDate('');
+  };
+
+  const renderIncidentMarkers = (coordinates, type, isDrawing = false) => {
+    const color = INCIDENT_TYPES[type]?.color || '#000000';
     
-    try {
-      await Promise.all(updatedIncidents.map(incident => createIncident(incident)));
-      setIncidents(updatedIncidents);
-      resetForm();
-    } catch (error) {
-      console.error('Error updating incidents:', error);
-    }
+    return (
+      <>
+        {coordinates.map((point, index) => (
+          <CircleMarker
+            key={`${isDrawing ? 'drawing' : 'incident'}-${index}`}
+            center={point}
+            radius={5}
+            pathOptions={{ color }}
+          />
+        ))}
+        {coordinates.length > 1 && (
+          <Polyline
+            positions={coordinates}
+            pathOptions={{ color }}
+          />
+        )}
+      </>
+    );
   };
 
-  const renderIncidentMarkers = (path, type, isSelected = false) => {
-    if (type === 'NATURAL_DISASTER') {
-      // Render spray points for natural disasters
-      return path.map((point, index) => (
-        <CircleMarker
-          key={`${isSelected ? 'current' : type}-${index}`}
-          center={point}
-          radius={2}
-          pathOptions={{
-            color: INCIDENT_TYPES[type].color,
-            fillColor: INCIDENT_TYPES[type].color,
-            fillOpacity: 0.6,
-            weight: 1
-          }}
-        />
-      ));
-    } else {
-      // Render polyline for traffic and construction
-      return (
-        <Polyline
-          positions={path}
-          pathOptions={{
-            color: INCIDENT_TYPES[type].color,
-            weight: 3
-          }}
-        />
-      );
-    }
+  const getIncidentColor = (type) => {
+    return INCIDENT_TYPES[type]?.color || '#000000';
   };
 
-  return (
-    <div className="map-container">
-      <div className="map-instructions">
-        <span className="instruction-text">
-          Hold <kbd>Space</kbd> + Mouse to move map
-        </span>
-      </div>
-      <div className="map-controls">
+  const renderControls = () => {
+    return (
+      <div>
+        <h4>Generate Report</h4>
         <select 
           value={selectedIncidentType}
           onChange={(e) => setSelectedIncidentType(e.target.value)}
@@ -333,14 +284,12 @@ const MapComponent = () => {
         </select>
 
         {!selectedIncident && (
-          <>
-            <button 
-              onClick={() => setDrawingMode(!drawingMode)}
-              className={`control-button ${drawingMode ? 'active' : ''}`}
-            >
-              {drawingMode ? 'Drawing Mode (Active)' : 'Start Drawing'}
-            </button>
-          </>
+          <button 
+            onClick={() => setDrawingMode(!drawingMode)}
+            className={`control-button ${drawingMode ? 'active' : ''}`}
+          >
+            {drawingMode ? 'Drawing Mode (Active)' : 'Start Drawing'}
+          </button>
         )}
 
         {(drawingMode || selectedIncident) && (
@@ -393,22 +342,7 @@ const MapComponent = () => {
               )}
             </div>
 
-            {selectedIncident ? (
-              <div className="edit-controls">
-                <button 
-                  onClick={() => handleUpdateIncident(selectedIncident.id)}
-                  className="control-button update"
-                >
-                  Update Incident
-                </button>
-                <button 
-                  onClick={resetForm}
-                  className="control-button cancel"
-                >
-                  Cancel Edit
-                </button>
-              </div>
-            ) : (
+            {drawingMode && (
               <div className="drawing-controls">
                 <button 
                   onClick={handleDrawingComplete}
@@ -427,101 +361,67 @@ const MapComponent = () => {
           </>
         )}
       </div>
+    );
+  };
 
-      <MapContainer
-        center={[13.6217, 123.1948]}
-        zoom={13}
-        style={{ height: "100%", width: "100%" }}
-        zoomControl={false}
-      >
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
-        {loading && (
-          <div className="loading-spinner">
-            Loading...
-          </div>
-        )}
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        <DrawingComponent 
-          onAddPoint={handleAddPoint} 
-          drawingMode={drawingMode}
-          selectedIncidentType={selectedIncidentType}
-        />
-        <ZoomControl position="bottomleft" />
-        
-        {currentPath.length > 0 && renderIncidentMarkers(currentPath, selectedIncidentType, true)}
+  return (
+    <>
+      <div className="client-container">
+        <div className="map-section">
+          <MapContainer
+            center={[13.6217, 123.1948]}
+            zoom={13}
+            style={{ height: "100%", width: "100%" }}
+            zoomControl={false}
+          >
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
+            <ZoomControl position="bottomleft" />
+            {incidents.map((incident) => (
+              <GeoJSON
+                key={incident._id}
+                data={{
+                  type: 'LineString',
+                  coordinates: incident.coordinates
+                }}
+                style={() => ({
+                  color: getIncidentColor(incident.type),
+                  weight: 3,
+                  opacity: 0.7,
+                })} />
+            ))}
+            {currentPath.length > 0 && renderIncidentMarkers(currentPath, selectedIncidentType, true)}
+            <DrawingComponent
+              onAddPoint={handleAddPoint}
+              drawingMode={drawingMode}
+              selectedIncidentType={selectedIncidentType} />
+          </MapContainer>
 
-        {incidents.map((incident, index) => renderIncidentMarkers(incident.coordinates, incident.type))}
-        
-        <div className="map-legend">
-          <h4>Incident Legend</h4>
-          {Object.entries(INCIDENT_TYPES).map(([key, value]) => (
-            <div key={key} className="legend-item">
-              <span 
-                className="legend-color" 
-                style={{ backgroundColor: value.color }}
-              ></span>
-              <span className="legend-text">{value.description}</span>
-            </div>
-          ))}
+          <div className="map-controls">
+            {renderControls()}
+          </div>
         </div>
-      </MapContainer>
-      
-      <div className="incidents-list">
-        <h3>Active Incidents</h3>
-        {incidents.map((incident) => {
-          const expiryTime = new Date(incident.expiryTime);
-          const now = new Date();
-          const isExpiringSoon = (expiryTime - now) < (1000 * 60 * 60); // Less than 1 hour
-
-          return (
-            <div key={incident.id} className={`incident-item ${isExpiringSoon ? 'expiring-soon' : ''}`}>
-              <div className="incident-type" style={{ color: INCIDENT_TYPES[incident.type].color }}>
-                {INCIDENT_TYPES[incident.type].name}
-              </div>
-              <div className="incident-description">{incident.description}</div>
-              <div className="incident-time">
-                Created: {new Date(incident.timestamp).toLocaleString()}
-              </div>
-              <div className="incident-expiry">
-                Expires: {new Date(incident.expiryTime).toLocaleString()}
-              </div>
-              <div className="incident-actions">
-                <button
-                  onClick={() => {
-                    setSelectedIncident(incident);
-                    setDescription(incident.description);
-                    if (incident.durationValue && incident.durationUnit) {
-                      setExpiryType('duration');
-                      setDuration(incident.durationValue);
-                      setDurationUnit(incident.durationUnit);
-                    } else {
-                      setExpiryType('date');
-                      setExpiryDate(new Date(incident.expiryTime).toISOString().slice(0, 16));
-                    }
-                  }}
-                  className="edit-button"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteIncident(incident.id)}
-                  className="delete-button"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          );
-        })}
+        <div className="incidents-section">
+          <h3>Active Incidents</h3>
+          <ActiveIncidentsList
+            incidents={incidents}
+            loading={loading}
+            error={error}
+            selectedIncident={selectedIncident}
+            onSelectIncident={setSelectedIncident}
+            onDeleteIncident={handleDeleteIncident} />
+        </div>
       </div>
-    </div>
+      {error && (
+        <div className="error-message">{error}</div>
+      )}
+      <div className="map-instructions">
+        <span className="instruction-text">
+          Hold <kbd>Space</kbd> + Mouse to drag the map
+        </span>
+      </div>
+    </>
   );
 };
 
