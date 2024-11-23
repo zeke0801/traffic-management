@@ -322,31 +322,23 @@ const MapComponent = () => {
               selectedIncidentType={selectedIncidentType}
             />
             {currentPath.length > 0 && (
-              <GeoJSON
-                data={{
-                  type: 'LineString',
-                  coordinates: currentPath.map(([lat, lng]) => [lng, lat])
-                }}
-                style={{
-                  color: getIncidentColor(selectedIncidentType),
-                  weight: 3,
-                  opacity: 0.7,
-                }}
-              />
+              <>
+                {renderIncidentMarkers(currentPath, selectedIncidentType, true)}
+                <Polyline
+                  positions={currentPath}
+                  color={INCIDENT_TYPES[selectedIncidentType]?.color || '#000000'}
+                />
+              </>
             )}
             {incidents.map((incident) => (
-              <GeoJSON
-                key={incident._id}
-                data={{
-                  type: 'LineString',
-                  coordinates: incident.coordinates
-                }}
-                style={() => ({
-                  color: getIncidentColor(incident.type),
-                  weight: 3,
-                  opacity: 0.7,
-                })}
-              />
+              <React.Fragment key={incident._id}>
+                {renderIncidentMarkers(incident.coordinates, incident.type)}
+                <Polyline
+                  positions={incident.coordinates}
+                  color={INCIDENT_TYPES[incident.type]?.color || '#000000'}
+                  onClick={() => setSelectedIncident(incident)}
+                />
+              </React.Fragment>
             ))}
           </MapContainer>
 
