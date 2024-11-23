@@ -1,15 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapComponent.css';
 import { fetchIncidents, createIncident, deleteIncident } from '../../services/api';
-import { INCIDENT_TYPES } from '../../constants/incidentTypes';
+import { INCIDENT_TYPES, DURATION_UNITS } from '../../constants/incidentTypes';
 import ActiveIncidentsList from '../Incidents/ActiveIncidentsList';
-
-const DURATION_UNITS = {
-  HOURS: 'hours',
-  DAYS: 'days'
-};
 
 const DrawingComponent = ({ onAddPoint, drawingMode, selectedIncidentType }) => {
   const [isDrawing, setIsDrawing] = useState(false);
@@ -204,43 +199,46 @@ const MapComponent = () => {
     setCurrentPath([...currentPath, [latlng.lat, latlng.lng]]);
   };
 
-  const handleDrawingComplete = async () => {
-    if (currentPath.length === 0) {
-      setError('Please draw a path first');
-      return;
+  const calculateExpiryTime = () => {
+    if (expiryType === 'duration') {
+      const now = new Date();
+      const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
+      return new Date(now.getTime() + hours * 60 * 60 * 1000).toISOString();
     }
+    return new Date(expiryDate).toISOString();
+  };
 
-    if (!description) {
-      setError('Please enter a description');
-      return;
-    }
+  const handleDrawingComplete = async () => {
+    if (currentPath.length === 0) return;
 
     try {
       setLoading(true);
       setError(null);
 
-      let expiryTime;
-      if (expiryType === 'duration') {
-        const now = new Date();
-        const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
-        expiryTime = new Date(now.getTime() + hours * 60 * 60 * 1000);
-      } else {
-        expiryTime = new Date(expiryDate);
-      }
+      const expiryTime = calculateExpiryTime();
 
       await createIncident({
         type: selectedIncidentType,
         coordinates: currentPath,
         description,
-        expiryTime: expiryTime.toISOString(),
-        durationValue: expiryType === 'duration' ? duration : null,
-        durationUnit: expiryType === 'duration' ? durationUnit : null,
+        expiryTime
       });
 
-      resetForm();
-    } catch (error) {
-      console.error('Error creating incident:', error);
+      // Reset form
+      setCurrentPath([]);
+      setDescription('');
+      setSelectedIncidentType('');
+      setDuration(1);
+      setDurationUnit(DURATION_UNITS.HOURS);
+      setExpiryType('duration');
+      setExpiryDate('');
+      
+      // Refresh incidents
+      const updatedIncidents = await fetchIncidents();
+      setIncidents(updatedIncidents);
+    } catch (err) {
       setError('Failed to create incident. Please try again.');
+      console.error('Error creating incident:', err);
     } finally {
       setLoading(false);
     }
@@ -292,10 +290,6 @@ const MapComponent = () => {
         )}
       </>
     );
-  };
-
-  const getIncidentColor = (type) => {
-    return INCIDENT_TYPES[type]?.color || '#000000';
   };
 
   return (

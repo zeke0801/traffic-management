@@ -21,6 +21,11 @@ export const INCIDENT_TYPES = {
   }
 };
 
+export const DURATION_UNITS = {
+  HOURS: 'hours',
+  DAYS: 'days'
+};
+
 export const calculateTimeRemaining = (expiryTime) => {
   const now = new Date();
   const expiry = new Date(expiryTime);
@@ -31,8 +36,14 @@ export const calculateTimeRemaining = (expiryTime) => {
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-  if (hours > 0) {
-    return `${hours}h ${minutes}m remaining`;
+  if (hours > 24) {
+    const days = Math.floor(hours / 24);
+    return `${days} day${days > 1 ? 's' : ''} remaining`;
   }
-  return `${minutes}m remaining`;
+
+  if (hours > 0) {
+    return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} min remaining`;
+  }
+
+  return `${minutes} min remaining`;
 };
