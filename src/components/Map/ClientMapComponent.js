@@ -52,6 +52,36 @@ const MapControls = () => {
   return null;
 };
 
+const Clock = () => {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date) => {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
+  return (
+    <div className="datetime-display">
+      <div className="clock">
+        Time: {time.toLocaleTimeString('en-US', { hour12: false })}
+      </div>
+      <div className="date">
+        Date: {formatDate(time)}
+      </div>
+    </div>
+  );
+};
+
 const ClientMapComponent = () => {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -126,6 +156,7 @@ const ClientMapComponent = () => {
 
       <div className="incidents-section">
         <h3>Active Incidents</h3>
+        <Clock />
         <ActiveIncidentsList 
           incidents={incidents}
           loading={loading}

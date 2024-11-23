@@ -13,7 +13,6 @@ const ActiveIncidentsList = ({
 }) => {
   return (
     <div className="incidents-content">
-      {loading && <div className="list-loading">Loading incidents...</div>}
       <div className="incidents-grid">
         {incidents.map((incident) => (
           <div 
