@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, ZoomControl, GeoJSON, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, ZoomControl, GeoJSON, CircleMarker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './ClientMapComponent.css';
 import { fetchIncidents } from '../../services/api';
@@ -117,6 +117,23 @@ const ClientMapComponent = () => {
     return INCIDENT_TYPES[type]?.color || '#999';
   };
 
+  const renderIncidentMarkers = (coordinates, type) => {
+    const color = getIncidentColor(type);
+    return coordinates.map((point, index) => (
+      <CircleMarker
+        key={`marker-${index}`}
+        center={point}
+        radius={5}
+        pathOptions={{
+          fillColor: color,
+          fillOpacity: 0.7,
+          color: color,
+          weight: 1
+        }}
+      />
+    ));
+  };
+
   return (
     <div className="client-container">
       <div className="map-section">
@@ -136,18 +153,21 @@ const ClientMapComponent = () => {
           <ZoomControl position="bottomleft" />
           <MapControls />
           {incidents.map((incident) => (
-            <GeoJSON
-              key={incident._id}
-              data={{
-                type: 'LineString',
-                coordinates: incident.coordinates
-              }}
-              style={() => ({
-                color: getIncidentColor(incident.type),
-                weight: 3,
-                opacity: 0.7,
-              })}
-            />
+            <React.Fragment key={incident._id}>
+              {renderIncidentMarkers(incident.coordinates, incident.type)}
+              <GeoJSON
+                data={{
+                  type: 'LineString',
+                  coordinates: incident.coordinates.map(coord => [coord[1], coord[0]])
+                }}
+                style={() => ({
+                  color: getIncidentColor(incident.type),
+                  weight: 3,
+                  opacity: 0.7,
+                })}
+                onClick={() => setSelectedIncident(incident._id)}
+              />
+            </React.Fragment>
           ))}
           
           <IncidentLegend />
