@@ -9,10 +9,9 @@ const IncidentLegend = () => {
       <div className="legend-items">
         {Object.entries(INCIDENT_TYPES).map(([key, value]) => (
           <div key={key} className="legend-item">
-            <div 
-              className="legend-color" 
-              style={{ backgroundColor: value.color }}
-            />
+            <div className="legend-symbol">
+              <img src={value.symbol} alt={value.name} className="legend-icon" />
+            </div>
             <span className="legend-text">{value.name}</span>
           </div>
         ))}

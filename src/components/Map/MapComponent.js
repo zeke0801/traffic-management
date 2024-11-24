@@ -1,60 +1,80 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents, ZoomControl, Marker } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapComponent.css';
 import { fetchIncidents, createIncident, deleteIncident } from '../../services/api';
 import { INCIDENT_TYPES, DURATION_UNITS } from '../../constants/incidentTypes';
 import ActiveIncidentsList from '../Incidents/ActiveIncidentsList';
+import carCollisionPng from '../../svg/car-collision-svgrepo-com.png';
+import constructionPng from '../../svg/construction-svgrepo-com.png';
+import floodingPng from '../../svg/wave-svgrepo-com.png';
+import detourRightOnly from '../../svg/detour-rightonly.png';
+import detourBothWay from '../../svg/detour-bothway.png';
 
-const DrawingComponent = ({ onAddPoint, selectedIncidentType }) => {
+const MapControls = () => {
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const mapRef = useRef(null);
 
   const map = useMapEvents({
-    click(e) {
-      if (!isSpacePressed) {
-        onAddPoint(e.latlng);
-      }
-    },
-    mousedown(e) {
-      if (isSpacePressed) {
-        mapRef.current = e.originalEvent;
-        map.dragging.enable();
-      }
-    },
-    mouseup() {
-      if (isSpacePressed) {
-        map.dragging.disable();
-      }
+    load: () => {
+      mapRef.current = map;
+      map.dragging.disable();
     }
   });
 
   useEffect(() => {
+    if (!mapRef.current) return;
+
     const handleKeyDown = (e) => {
-      if (e.code === 'Space') {
+      if (e.code === 'Space' && !isSpacePressed) {
+        e.preventDefault();
         setIsSpacePressed(true);
-        map.dragging.enable();
+        mapRef.current.dragging.enable();
       }
     };
 
     const handleKeyUp = (e) => {
       if (e.code === 'Space') {
+        e.preventDefault();
         setIsSpacePressed(false);
-        map.dragging.disable();
+        mapRef.current.dragging.disable();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
-    map.dragging.disable();
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      map.dragging.enable();
+      if (mapRef.current) {
+        mapRef.current.dragging.disable();
+      }
     };
-  }, [map, isSpacePressed]);
+  }, [isSpacePressed]);
+
+  return null;
+};
+
+const DrawingComponent = ({ onAddPoint, selectedIncidentType }) => {
+  const map = useMapEvents({
+    click(e) {
+      if (selectedIncidentType) {
+        onAddPoint(e.latlng);
+      }
+    }
+  });
+
+  useEffect(() => {
+    // Update cursor style based on whether an incident type is selected
+    const container = map.getContainer();
+    container.style.cursor = selectedIncidentType ? 'crosshair' : 'default';
+    
+    return () => {
+      container.style.cursor = 'default';
+    };
+  }, [map, selectedIncidentType]);
 
   return null;
 };
@@ -89,6 +109,47 @@ const Clock = () => {
   );
 };
 
+// Custom collision icon
+const collisionIcon = () => new L.DivIcon({
+  html: `<div style="transform: translate(-50%, -50%);">
+    <img src="${carCollisionPng}" alt="collision" style="width: 32px; height: 32px;" />
+  </div>`,
+  className: 'collision-icon',
+  iconSize: [32, 32],
+});
+
+const constructionIcon = () => new L.DivIcon({
+  html: `<div style="transform: translate(-50%, -50%);">
+    <img src="${constructionPng}" alt="construction" style="width: 32px; height: 32px;" />
+  </div>`,
+  className: 'construction-icon',
+  iconSize: [32, 32],
+});
+
+const floodingIcon = () => new L.DivIcon({
+  html: `<div style="transform: translate(-50%, -50%);">
+    <img src="${floodingPng}" alt="flooding" style="width: 32px; height: 32px;" />
+  </div>`,
+  className: 'flooding-icon',
+  iconSize: [32, 32],
+});
+
+const detourOneWayIcon = () => new L.DivIcon({
+  html: `<div style="transform: translate(-50%, -50%);">
+    <img src="${detourRightOnly}" alt="one-way detour" style="width: 32px; height: 32px;" />
+  </div>`,
+  className: 'detour-oneway-icon',
+  iconSize: [32, 32],
+});
+
+const detourTwoWayIcon = () => new L.DivIcon({
+  html: `<div style="transform: translate(-50%, -50%);">
+    <img src="${detourBothWay}" alt="two-way detour" style="width: 32px; height: 32px;" />
+  </div>`,
+  className: 'detour-twoway-icon',
+  iconSize: [32, 32],
+});
+
 const MapComponent = () => {
   const [incidents, setIncidents] = useState([]);
   const [error, setError] = useState(null);
@@ -99,7 +160,8 @@ const MapComponent = () => {
   const [duration, setDuration] = useState(1);
   const [durationUnit, setDurationUnit] = useState(DURATION_UNITS.HOURS);
   const [expiryType, setExpiryType] = useState('duration');
-  const [expiryDate, setExpiryDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,7 +195,10 @@ const MapComponent = () => {
       const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
       return new Date(now.getTime() + hours * 60 * 60 * 1000).toISOString();
     }
-    return new Date(expiryDate).toISOString();
+    if (expiryType === 'specific') {
+      return endDate ? new Date(endDate).toISOString() : null;
+    }
+    return null;
   };
 
   const handleDrawingComplete = async () => {
@@ -143,12 +208,14 @@ const MapComponent = () => {
       setError(null);
 
       const expiryTime = calculateExpiryTime();
+      const startTime = startDate ? new Date(startDate).toISOString() : null;
 
       await createIncident({
         type: selectedIncidentType,
         coordinates: currentPath,
         description,
-        expiryTime
+        expiryTime,
+        startTime
       });
 
       // Reset form
@@ -158,15 +225,23 @@ const MapComponent = () => {
       setDuration(1);
       setDurationUnit(DURATION_UNITS.HOURS);
       setExpiryType('duration');
-      setExpiryDate('');
-      
-      // Refresh incidents
-      const updatedIncidents = await fetchIncidents();
-      setIncidents(updatedIncidents);
+      setStartDate('');
+      setEndDate('');
     } catch (err) {
       setError('Failed to create incident. Please try again.');
       console.error('Error creating incident:', err);
     }
+  };
+
+  const handleCancelDrawing = () => {
+    setCurrentPath([]);
+    setSelectedIncidentType('');
+    setDescription('');
+    setDuration(1);
+    setDurationUnit(DURATION_UNITS.HOURS);
+    setExpiryType('duration');
+    setStartDate('');
+    setEndDate('');
   };
 
   const handleDeleteIncident = async (incidentId) => {
@@ -187,19 +262,140 @@ const MapComponent = () => {
     
     return (
       <>
-        {coordinates.map((point, index) => (
-          <CircleMarker
-            key={`${isDrawing ? 'drawing' : 'incident'}-${index}`}
-            center={point}
-            radius={5}
-            pathOptions={{
-              fillColor: color,
-              fillOpacity: 0.7,
-              color: color,
-              weight: 1
-            }}
-          />
-        ))}
+        {type === 'COLLISION' ? (
+          <>
+            {coordinates.map((point, index) => (
+              <Marker
+                key={`collision-${index}`}
+                position={point}
+                icon={collisionIcon()}
+              />
+            ))}
+            {coordinates.length > 1 && (
+              <Polyline
+                positions={coordinates}
+                pathOptions={{
+                  color: '#F44336',
+                  weight: 3,
+                  opacity: 0.8,
+                  dashArray: '8, 12'
+                }}
+              />
+            )}
+          </>
+        ) : type === 'CONSTRUCTION' ? (
+          <>
+            {coordinates.map((point, index) => (
+              <Marker
+                key={`construction-${index}`}
+                position={point}
+                icon={constructionIcon()}
+              />
+            ))}
+            {coordinates.length > 1 && (
+              <Polyline
+                positions={coordinates}
+                pathOptions={{
+                  color: '#FF9800',
+                  weight: 3,
+                  opacity: 0.8,
+                  dashArray: '10, 10'
+                }}
+              />
+            )}
+          </>
+        ) : type === 'FLOODING' ? (
+          <>
+            {coordinates.map((point, index) => (
+              <Marker
+                key={`flooding-${index}`}
+                position={point}
+                icon={floodingIcon()}
+              />
+            ))}
+            {coordinates.length > 1 && (
+              <Polyline
+                positions={coordinates}
+                pathOptions={{
+                  color: '#2196F3',
+                  weight: 3,
+                  opacity: 0.8,
+                  dashArray: '5, 10'
+                }}
+              />
+            )}
+          </>
+        ) : type === 'DETOUR_ONE_WAY' ? (
+          <>
+            {coordinates.map((point, index) => (
+              <Marker
+                key={`detour-oneway-${index}`}
+                position={point}
+                icon={detourOneWayIcon()}
+              />
+            ))}
+            {coordinates.length > 1 && (
+              <Polyline
+                positions={coordinates}
+                pathOptions={{
+                  color: '#4CAF50',
+                  weight: 3,
+                  opacity: 0.8,
+                  dashArray: '15, 10',
+                  lineCap: 'round'
+                }}
+              />
+            )}
+          </>
+        ) : type === 'DETOUR_TWO_WAY' ? (
+          <>
+            {coordinates.map((point, index) => (
+              <Marker
+                key={`detour-twoway-${index}`}
+                position={point}
+                icon={detourTwoWayIcon()}
+              />
+            ))}
+            {coordinates.length > 1 && (
+              <Polyline
+                positions={coordinates}
+                pathOptions={{
+                  color: '#9C27B0',
+                  weight: 3,
+                  opacity: 0.8,
+                  dashArray: '20, 10',
+                  lineCap: 'round'
+                }}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            {coordinates.map((point, index) => (
+              <CircleMarker
+                key={`${isDrawing ? 'drawing' : 'incident'}-${index}`}
+                center={point}
+                radius={5}
+                pathOptions={{
+                  fillColor: color,
+                  fillOpacity: 0.7,
+                  color: color,
+                  weight: 1
+                }}
+              />
+            ))}
+            {coordinates.length > 1 && (
+              <Polyline
+                positions={coordinates}
+                pathOptions={{
+                  color: color,
+                  weight: 2,
+                  opacity: 0.7
+                }}
+              />
+            )}
+          </>
+        )}
       </>
     );
   };
@@ -226,6 +422,7 @@ const MapComponent = () => {
               onAddPoint={handleAddPoint}
               selectedIncidentType={selectedIncidentType}
             />
+            <MapControls />
             {currentPath.length > 0 && (
               <>
                 {renderIncidentMarkers(currentPath, selectedIncidentType, true)}
@@ -278,6 +475,7 @@ const MapComponent = () => {
                 >
                   <option value="duration">Duration</option>
                   <option value="specific">Specific Time</option>
+                  <option value="no_expiry">No Specific Time</option>
                 </select>
 
                 {expiryType === 'duration' ? (
@@ -294,17 +492,35 @@ const MapComponent = () => {
                       onChange={(e) => setDurationUnit(e.target.value)}
                       className="duration-unit-select"
                     >
-                      <option value={DURATION_UNITS.HOURS}>Hours</option>
+                      <option value={DURATION_UNITS.HOURS}>Hour(s)</option>
                       <option value={DURATION_UNITS.DAYS}>Days</option>
                     </select>
                   </div>
+                ) : expiryType === 'specific' ? (
+                  <div className="specific-time-inputs">
+                    <div className="time-input-group">
+                      <label>Start Time:</label>
+                      <input
+                        type="datetime-local"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="time-input"
+                      />
+                    </div>
+                    <div className="time-input-group">
+                      <label>End Time:</label>
+                      <input
+                        type="datetime-local"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="time-input"
+                      />
+                    </div>
+                  </div>
                 ) : (
-                  <input
-                    type="datetime-local"
-                    value={expiryDate}
-                    onChange={(e) => setExpiryDate(e.target.value)}
-                    className="expiry-date-input"
-                  />
+                  <div className="no-expiry-note">
+                    This incident will not expire automatically
+                  </div>
                 )}
               </div>
 
@@ -315,6 +531,25 @@ const MapComponent = () => {
               >
                 Submit Report
               </button>
+
+              {currentPath.length > 0 && (
+                <button 
+                  className="cancel-button" 
+                  onClick={handleCancelDrawing}
+                  style={{
+                    padding: '5px 10px',
+                    backgroundColor: '#dc3545',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel Drawing
+                </button>
+              )}
+
+              
             </div>
           </div>
         </div>
@@ -329,11 +564,11 @@ const MapComponent = () => {
           />
         </div>
       </div>
-      <div className="map-instructions">
+      {/*<div className="map-instructions">
         <span className="instruction-text">
           Hold <kbd>Space</kbd> + Mouse to drag the map
         </span>
-      </div>
+      </div>*/}
     </>
   );
 };

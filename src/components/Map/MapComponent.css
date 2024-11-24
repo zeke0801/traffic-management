@@ -103,6 +103,10 @@ kbd {
   font-size: var(--font-size-sm);
 }
 
+.expiry-type-select{
+  margin-bottom: .5rem;
+}
+
 .duration-inputs {
   display: flex;
   gap: var(--spacing-xs);
@@ -134,6 +138,25 @@ kbd {
 .control-button:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
+}
+
+.cancel-button {
+  padding: 5px 10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #c82333;
+}
+
+.cancel-button:active {
+  background-color: #bd2130;
 }
 
 .error-message {
@@ -181,6 +204,64 @@ kbd {
 
 .date {
   border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.vehicle-collision-icon,
+.construction-icon,
+.flooding-icon {
+  background: none !important;
+  border: none !important;
+}
+
+.vehicle-collision-icon svg,
+.construction-icon svg,
+.flooding-icon svg {
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7));
+  transform: scale(1.2);
+}
+
+.no-expiry-note {
+  padding: 8px;
+  color: #666;
+  font-size: 0.9em;
+  font-style: italic;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.specific-time-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.time-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.time-input-group label {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.time-input {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
 
 @media (max-width: 768px) {

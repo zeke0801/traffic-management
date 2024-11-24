@@ -1,23 +1,34 @@
+import carCollisionPng from '../svg/car-collision-svgrepo-com.png';
+import constructionPng from '../svg/construction-svgrepo-com.png';
+import wavePng from '../svg/wave-svgrepo-com.png';
+import detourboth from '../svg/detour-bothway.png';
+import detouroneway from '../svg/detour-rightonly.png';
+
 export const INCIDENT_TYPES = {
   COLLISION: {
     name: 'Collision',
-    color: '#FF0000',
+    symbol: carCollisionPng,
     description: 'Vehicle collision or accident'
   },
   CONSTRUCTION: {
     name: 'Construction',
-    color: '#FFA500',
+    symbol: constructionPng,
     description: 'Road construction or maintenance'
   },
-  NATURAL_DISASTER: {
-    name: 'Natural Disaster',
-    color: '#800080',
-    description: 'Natural disaster affecting traffic'
+  FLOODING: {
+    name: 'Flooding',
+    symbol: wavePng,
+    description: 'Flooded road or area'
   },
-  DETOUR: {
-    name: 'Detour Route',
-    color: '#00FF00',
-    description: 'Alternative route'
+  DETOUR_ONE_WAY: {
+    name: 'Detour: One Way',
+    symbol: detouroneway,
+    description: 'One-way alternative route'
+  },
+  DETOUR_TWO_WAY: {
+    name: 'Detour: Two Way',
+    symbol: detourboth,
+    description: 'Two-way alternative route'
   }
 };
 
