@@ -5,6 +5,8 @@ import detourboth from '../svg/detour-bothway.png';
 import detouroneway from '../svg/detour-rightonly.png';
 import publiceventPng from '../svg/publicevent.png';
 import closedRoadPng from '../svg/closedroad.png';
+import { format, parseISO } from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
 
 export const INCIDENT_TYPES = {
   COLLISION: {
@@ -109,17 +111,11 @@ export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
 export const formatRecordedDate = (dateString) => {
   if (!dateString) return 'No date recorded';
   try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Invalid date';
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
+    const date = parseISO(dateString);
+    const phtDate = utcToZonedTime(date, 'Asia/Manila');
+    return format(phtDate, 'MMM d, yyyy, hh:mm a');
   } catch (error) {
+    console.error('Error formatting date:', error);
     return 'Invalid date';
   }
 };

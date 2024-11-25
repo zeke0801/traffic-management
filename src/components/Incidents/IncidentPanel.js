@@ -51,7 +51,7 @@ const IncidentPanel = ({
               <div className={styles.reportTime}>
                 {calculateTimeRemaining(incident.startTime, incident.duration, incident.durationUnit)}
                 <div className={styles.recordedDate}>
-                  Recorded: {formatRecordedDate(incident.startTime)}
+                  Recorded: {formatRecordedDate(incident.recordedAt || incident.startTime)}
                 </div>
               </div>
             </div>
