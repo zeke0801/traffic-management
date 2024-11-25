@@ -228,23 +228,18 @@ const MapComponent = () => {
     });
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setError(null);
-        const data = await fetchIncidents();
-        setIncidents(data);
-      } catch (error) {
-        console.error('Error fetching incidents:', error);
-        setError(
-          <div>
-            <span>Failed to load incidents</span>
-            <span className="error-retry">Please try again later.</span>
-          </div>
-        );
-      }
-    };
+  const fetchData = async () => {
+    try {
+      setError(null);
+      const data = await fetchIncidents();
+      setIncidents(data);
+    } catch (error) {
+      console.error('Error fetching incidents:', error);
+      setError('Failed to load incidents. Please try again later.');
+    }
+  };
 
+  useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
@@ -277,7 +272,11 @@ const MapComponent = () => {
         recordedAt: currentTime.toISOString()
       };
 
-      await createIncident(incidentData);
+      const result = await createIncident(incidentData);
+      console.log('Created incident:', result);
+
+      // Immediately fetch updated incidents
+      await fetchData();
 
       // Reset form
       setCurrentPath([]);
