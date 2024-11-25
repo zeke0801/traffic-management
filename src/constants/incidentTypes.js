@@ -107,3 +107,14 @@ export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
   
   return 'No duration set';
 };
+
+export const formatRecordedDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};

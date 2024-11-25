@@ -1,5 +1,5 @@
 import React from 'react';
-import { INCIDENT_TYPES, calculateTimeRemaining } from '../../constants/incidentTypes';
+import { INCIDENT_TYPES, calculateTimeRemaining, formatRecordedDate } from '../../constants/incidentTypes';
 import styles from './IncidentPanel.module.css';
 
 const IncidentPanel = ({ 
@@ -50,6 +50,9 @@ const IncidentPanel = ({
               </div>
               <div className={styles.reportTime}>
                 {calculateTimeRemaining(incident.startTime, incident.duration, incident.durationUnit)}
+                <div className={styles.recordedDate}>
+                  Recorded: {formatRecordedDate(incident.startTime)}
+                </div>
               </div>
             </div>
           ))}

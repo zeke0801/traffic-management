@@ -274,6 +274,8 @@ const MapComponent = () => {
       setError(null);
 
       let startTime, expiryTime;
+      let calculatedDuration = duration;
+      let calculatedDurationUnit = durationUnit;
 
       if (expiryType === 'duration') {
         if (!duration || duration <= 0) {
@@ -297,8 +299,8 @@ const MapComponent = () => {
         }
         // Calculate duration in hours
         const durationHours = (expiryTime - startTime) / (1000 * 60 * 60);
-        duration = durationHours;
-        durationUnit = DURATION_UNITS.HOURS;
+        calculatedDuration = durationHours;
+        calculatedDurationUnit = DURATION_UNITS.HOURS;
       }
 
       const incidentData = {
@@ -307,8 +309,8 @@ const MapComponent = () => {
         description: description || 'No description provided',
         startTime: startTime.toISOString(),
         expiryTime: expiryTime.toISOString(),
-        duration: duration,
-        durationUnit: durationUnit
+        duration: calculatedDuration,
+        durationUnit: calculatedDurationUnit
       };
 
       await createIncident(incidentData);
