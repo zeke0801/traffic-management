@@ -282,25 +282,43 @@ const MapComponent = () => {
           setError('Please set a valid duration');
           return;
         }
+        // For duration-based incidents, if no start date is set, use current time
         startTime = startDate ? new Date(startDate) : new Date();
-        const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
+        const hours = calculatedDurationUnit === DURATION_UNITS.HOURS ? 
+          calculatedDuration : calculatedDuration * 24;
         expiryTime = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
       } else {
-        // specific time range
-        if (!startDate || !endDate) {
-          setError('Please set both start and end dates');
+        // For specific time range
+        if (!startDate) {
+          setError('Please set a start date');
           return;
         }
+        if (!endDate) {
+          setError('Please set an end date');
+          return;
+        }
+
         startTime = new Date(startDate);
         expiryTime = new Date(endDate);
+
         if (expiryTime <= startTime) {
           setError('End date must be after start date');
           return;
         }
-        // Calculate duration in hours
-        const durationHours = (expiryTime - startTime) / (1000 * 60 * 60);
-        calculatedDuration = durationHours;
+
+        // Calculate duration in hours for consistency
+        calculatedDuration = (expiryTime - startTime) / (1000 * 60 * 60);
         calculatedDurationUnit = DURATION_UNITS.HOURS;
+      }
+
+      // Ensure all dates are valid before proceeding
+      if (!(startTime instanceof Date && !isNaN(startTime))) {
+        setError('Invalid start time');
+        return;
+      }
+      if (!(expiryTime instanceof Date && !isNaN(expiryTime))) {
+        setError('Invalid end time');
+        return;
       }
 
       const incidentData = {

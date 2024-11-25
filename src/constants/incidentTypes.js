@@ -57,15 +57,14 @@ export const DURATION_UNITS = {
 };
 
 export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
-  const now = new Date();
+  if (!startTime) return 'No start time set';
   
-  // If using specific time range
-  if (!duration && startTime) {
-    const start = new Date(startTime);
+  const now = new Date();
+  const start = new Date(startTime);
+  
+  // If the incident hasn't started yet
+  if (start > now) {
     const diff = start - now;
-    
-    if (diff <= 0) return 'In progress';
-    
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     
@@ -81,10 +80,9 @@ export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
     return `Starts in ${minutes}m`;
   }
   
-  // If using duration
+  // If using duration-based expiry
   if (duration) {
     const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
-    const start = startTime ? new Date(startTime) : now;
     const end = new Date(start.getTime() + hours * 60 * 60 * 1000);
     const diff = end - now;
     
@@ -105,7 +103,7 @@ export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
     return `${remainingMinutes}m remaining`;
   }
   
-  return 'No duration set';
+  return 'In progress';
 };
 
 export const formatRecordedDate = (dateString) => {
