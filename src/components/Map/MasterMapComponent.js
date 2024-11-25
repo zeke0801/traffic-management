@@ -296,9 +296,9 @@ const MapComponent = () => {
           return;
         }
         // Calculate duration in hours
-        const durationHours = (expiryTime - startTime) / (1000 * 60 * 60);
-        duration = durationHours;
-        durationUnit = DURATION_UNITS.HOURS;
+        let durationHours = (expiryTime - startTime) / (1000 * 60 * 60);
+        let duration = durationHours;
+        let durationUnit = DURATION_UNITS.HOURS;
       }
 
       const incidentData = {
