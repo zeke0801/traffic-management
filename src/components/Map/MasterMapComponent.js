@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MasterMapComponent.css';
 import { fetchIncidents, createIncident, deleteIncident } from '../../services/api';
-import { INCIDENT_TYPES, DURATION_UNITS } from '../../constants/incidentTypes';
+import { INCIDENT_TYPES } from '../../constants/incidentTypes';
 import IncidentPanel from '../Incidents/IncidentPanel';
 import carCollisionPng from '../../svg/car-collision-svgrepo-com.png';
 import constructionPng from '../../svg/construction-svgrepo-com.png';

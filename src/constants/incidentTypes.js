@@ -52,61 +52,6 @@ export const INCIDENT_TYPES = {
   }
 };
 
-export const DURATION_UNITS = {
-  HOURS: 'hours',
-  DAYS: 'days'
-};
-
-export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
-  if (!startTime) return 'No start time set';
-  
-  const now = new Date();
-  const start = new Date(startTime);
-  
-  // If the incident hasn't started yet
-  if (start > now) {
-    const diff = start - now;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (hours > 24) {
-      const days = Math.floor(hours / 24);
-      return `Starts in ${days} day${days > 1 ? 's' : ''}`;
-    }
-    
-    if (hours > 0) {
-      return `Starts in ${hours}h ${minutes}m`;
-    }
-    
-    return `Starts in ${minutes}m`;
-  }
-  
-  // If using duration-based expiry
-  if (duration) {
-    const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
-    const end = new Date(start.getTime() + hours * 60 * 60 * 1000);
-    const diff = end - now;
-    
-    if (diff <= 0) return 'Expired';
-    
-    const remainingHours = Math.floor(diff / (1000 * 60 * 60));
-    const remainingMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
-    if (remainingHours > 24) {
-      const days = Math.floor(remainingHours / 24);
-      return `${days} day${days > 1 ? 's' : ''} remaining`;
-    }
-    
-    if (remainingHours > 0) {
-      return `${remainingHours}h ${remainingMinutes}m remaining`;
-    }
-    
-    return `${remainingMinutes}m remaining`;
-  }
-  
-  return 'In progress';
-};
-
 export const formatRecordedDate = (dateString) => {
   if (!dateString) return 'No date recorded';
   try {
