@@ -108,14 +108,18 @@ export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
 
 export const formatRecordedDate = (dateString) => {
   if (!dateString) return 'No date recorded';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'Invalid date';
-  return date.toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  });
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch (error) {
+    return 'Invalid date';
+  }
 };
