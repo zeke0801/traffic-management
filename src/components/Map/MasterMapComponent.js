@@ -276,6 +276,10 @@ const MapComponent = () => {
 
       await createIncident(incidentData);
 
+      // Fetch updated incidents list
+      const updatedIncidents = await fetchIncidents();
+      setIncidents(updatedIncidents);
+
       // Reset form
       setCurrentPath([]);
       setDescription('');
