@@ -1,5 +1,5 @@
 import React from 'react';
-import { INCIDENT_TYPES, calculateTimeRemaining, formatRecordedDate } from '../../constants/incidentTypes';
+import { INCIDENT_TYPES, formatRecordedDate } from '../../constants/incidentTypes';
 import styles from './IncidentPanel.module.css';
 
 const IncidentPanel = ({ 
