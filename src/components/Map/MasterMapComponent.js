@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MasterMapComponent.css';
 import { fetchIncidents, createIncident, deleteIncident } from '../../services/api';
-import { INCIDENT_TYPES, DURATION_UNITS } from '../../constants/incidentTypes';
+import { INCIDENT_TYPES } from '../../constants/incidentTypes';
 import IncidentPanel from '../Incidents/IncidentPanel';
 import carCollisionPng from '../../svg/car-collision-svgrepo-com.png';
 import constructionPng from '../../svg/construction-svgrepo-com.png';
@@ -214,11 +214,6 @@ const MapComponent = () => {
   const [selectedIncidentType, setSelectedIncidentType] = useState('');
   const [description, setDescription] = useState('');
   const [selectedIncident, setSelectedIncident] = useState(null);
-  const [duration, setDuration] = useState(1);
-  const [durationUnit, setDurationUnit] = useState(DURATION_UNITS.HOURS);
-  const [expiryType, setExpiryType] = useState('duration');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
   const [hiddenIncidentTypes, setHiddenIncidentTypes] = useState(new Set());
 
   const toggleIncidentType = (type) => {
@@ -273,62 +268,10 @@ const MapComponent = () => {
     try {
       setError(null);
 
-      let startTime, expiryTime;
-      let calculatedDuration = duration;
-      let calculatedDurationUnit = durationUnit;
-
-      if (expiryType === 'duration') {
-        if (!duration || duration <= 0) {
-          setError('Please set a valid duration');
-          return;
-        }
-        // For duration-based incidents, if no start date is set, use current time
-        startTime = startDate ? new Date(startDate) : new Date();
-        const hours = calculatedDurationUnit === DURATION_UNITS.HOURS ? 
-          calculatedDuration : calculatedDuration * 24;
-        expiryTime = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
-      } else {
-        // For specific time range
-        if (!startDate) {
-          setError('Please set a start date');
-          return;
-        }
-        if (!endDate) {
-          setError('Please set an end date');
-          return;
-        }
-
-        startTime = new Date(startDate);
-        expiryTime = new Date(endDate);
-
-        if (expiryTime <= startTime) {
-          setError('End date must be after start date');
-          return;
-        }
-
-        // Calculate duration in hours for consistency
-        calculatedDuration = (expiryTime - startTime) / (1000 * 60 * 60);
-        calculatedDurationUnit = DURATION_UNITS.HOURS;
-      }
-
-      // Ensure all dates are valid before proceeding
-      if (!(startTime instanceof Date && !isNaN(startTime))) {
-        setError('Invalid start time');
-        return;
-      }
-      if (!(expiryTime instanceof Date && !isNaN(expiryTime))) {
-        setError('Invalid end time');
-        return;
-      }
-
       const incidentData = {
         type: selectedIncidentType,
         coordinates: currentPath,
         description: description || 'No description provided',
-        startTime: startTime.toISOString(),
-        expiryTime: expiryTime.toISOString(),
-        duration: calculatedDuration,
-        durationUnit: calculatedDurationUnit
       };
 
       await createIncident(incidentData);
@@ -337,11 +280,6 @@ const MapComponent = () => {
       setCurrentPath([]);
       setDescription('');
       setSelectedIncidentType('');
-      setDuration(1);
-      setDurationUnit(DURATION_UNITS.HOURS);
-      setExpiryType('duration');
-      setStartDate('');
-      setEndDate('');
     } catch (err) {
       console.error('Error creating incident:', err);
       setError('Failed to create incident. Please try again.');
@@ -352,11 +290,6 @@ const MapComponent = () => {
     setCurrentPath([]);
     setSelectedIncidentType('');
     setDescription('');
-    setDuration(1);
-    setDurationUnit(DURATION_UNITS.HOURS);
-    setExpiryType('duration');
-    setStartDate('');
-    setEndDate('');
   };
 
   const handleDeleteIncident = async (incidentId) => {
@@ -528,63 +461,6 @@ const MapComponent = () => {
               placeholder="Enter description"
               className="description-input"
             />
-
-            <div className="expiry-controls">
-              <select 
-                value={expiryType} 
-                onChange={(e) => setExpiryType(e.target.value)}
-                className="expiry-type-select"
-              >
-                <option value="duration">Duration</option>
-                <option value="specific">Specific Time</option>
-                <option value="no_expiry">No Specific Time</option>
-              </select>
-
-              {expiryType === 'duration' ? (
-                <div className="duration-inputs">
-                  <input
-                    type="number"
-                    min="1"
-                    value={duration}
-                    onChange={(e) => setDuration(parseInt(e.target.value))}
-                    className="duration-input"
-                  />
-                  <select
-                    value={durationUnit}
-                    onChange={(e) => setDurationUnit(e.target.value)}
-                    className="duration-unit-select"
-                  >
-                    <option value={DURATION_UNITS.HOURS}>Hour(s)</option>
-                    <option value={DURATION_UNITS.DAYS}>Days</option>
-                  </select>
-                </div>
-              ) : expiryType === 'specific' ? (
-                <div className="specific-time-inputs">
-                  <div className="time-input-group">
-                    <label>Start Time:</label>
-                    <input
-                      type="datetime-local"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="time-input"
-                    />
-                  </div>
-                  <div className="time-input-group">
-                    <label>End Time:</label>
-                    <input
-                      type="datetime-local"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="time-input"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="no-expiry-note">
-                  This incident will not expire automatically
-                </div>
-              )}
-            </div>
 
             <button
               onClick={handleDrawingComplete}
