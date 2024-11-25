@@ -13,7 +13,6 @@ import detourRightOnly from '../../svg/detour-rightonly.png';
 import detourBothWay from '../../svg/detour-bothway.png';
 import publicEventPng from '../../svg/publicevent.png';
 import closedRoadPng from '../../svg/closedroad.png';
-import { format } from 'date-fns';
 
 const MapControls = () => {
   const [isSpacePressed, setIsSpacePressed] = useState(false);
