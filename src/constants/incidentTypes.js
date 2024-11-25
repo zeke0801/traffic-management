@@ -5,7 +5,6 @@ import detourboth from '../svg/detour-bothway.png';
 import detouroneway from '../svg/detour-rightonly.png';
 import publiceventPng from '../svg/publicevent.png';
 import closedRoadPng from '../svg/closedroad.png';
-import { format } from 'date-fns';
 
 export const INCIDENT_TYPES = {
   COLLISION: {
@@ -52,15 +51,68 @@ export const INCIDENT_TYPES = {
   }
 };
 
-export const formatRecordedDate = (dateString) => {
-  if (!dateString) return 'Date and Time not recorded';
-  try {
-    const date = new Date(dateString);
-    // Add 8 hours for PHT
-    date.setHours(date.getHours() + 8);
-    return format(date, 'MMMM d, yyyy h:mm aa');
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return 'Invalid date';
+export const DURATION_UNITS = {
+  HOURS: 'hours',
+  DAYS: 'days'
+};
+
+export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
+  if (!startTime) return 'No start time set';
+  
+  const now = new Date();
+  const start = new Date(startTime);
+  
+  // If the incident hasn't started yet
+  if (start > now) {
+    const diff = start - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `Starts in ${days} day${days > 1 ? 's' : ''}`;
+    }
+    
+    if (hours > 0) {
+      return `Starts in ${hours}h ${minutes}m`;
+    }
+    
+    return `Starts in ${minutes}m`;
   }
+  
+  // If using duration-based expiry
+  if (duration) {
+    const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
+    const end = new Date(start.getTime() + hours * 60 * 60 * 1000);
+    const diff = end - now;
+    
+    if (diff <= 0) return 'Expired';
+    
+    const remainingHours = Math.floor(diff / (1000 * 60 * 60));
+    const remainingMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (remainingHours > 24) {
+      const days = Math.floor(remainingHours / 24);
+      return `${days} day${days > 1 ? 's' : ''} remaining`;
+    }
+    
+    if (remainingHours > 0) {
+      return `${remainingHours}h ${remainingMinutes}m remaining`;
+    }
+    
+    return `${remainingMinutes}m remaining`;
+  }
+  
+  return 'In progress';
+};
+
+export const formatRecordedDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
