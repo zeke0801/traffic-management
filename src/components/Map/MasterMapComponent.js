@@ -232,7 +232,9 @@ const MapComponent = () => {
     const fetchData = async () => {
       try {
         setError(null);
+        console.log('Fetching incidents...');
         const data = await fetchIncidents();
+        console.log('Fetched incidents:', data);
         setIncidents(data);
       } catch (error) {
         console.error('Error fetching incidents:', error);
@@ -497,6 +499,7 @@ const MapComponent = () => {
       </div>
       <div className="incidents-section">
         <Clock />
+        {console.log('Rendering IncidentPanel with incidents:', incidents)}
         <IncidentPanel
           incidents={incidents.filter(inc => !hiddenIncidentTypes.has(inc.type))}
           selectedIncident={selectedIncident}
