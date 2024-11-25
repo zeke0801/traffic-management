@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import './MasterMapComponent.css';
 import { fetchIncidents, createIncident, deleteIncident } from '../../services/api';
 import { INCIDENT_TYPES, DURATION_UNITS } from '../../constants/incidentTypes';
-import ActiveIncidentsList from '../Incidents/ActiveIncidentsList';
+import IncidentPanel from '../Incidents/IncidentPanel';
 import carCollisionPng from '../../svg/car-collision-svgrepo-com.png';
 import constructionPng from '../../svg/construction-svgrepo-com.png';
 import floodingPng from '../../svg/wave-svgrepo-com.png';
@@ -118,6 +118,7 @@ const collisionIcon = () => new L.DivIcon({
   </div>`,
   className: 'collision-icon',
   iconSize: [32, 32],
+  iconAnchor: [0, 0]
 });
 
 const constructionIcon = () => new L.DivIcon({
@@ -126,6 +127,7 @@ const constructionIcon = () => new L.DivIcon({
   </div>`,
   className: 'construction-icon',
   iconSize: [32, 32],
+  iconAnchor: [0, 0]
 });
 
 const floodingIcon = () => new L.DivIcon({
@@ -134,14 +136,16 @@ const floodingIcon = () => new L.DivIcon({
   </div>`,
   className: 'flooding-icon',
   iconSize: [32, 32],
+  iconAnchor: [0, 0]
 });
 
 const detourOneWayIcon = () => new L.DivIcon({
-  html: `<div style="transform: translate(-50%, -50%);">
+  html: `<div style="transform: translate(-50%, -50%); background">
     <img src="${detourRightOnly}" alt="one-way detour" style="width: 32px; height: 32px;" />
   </div>`,
   className: 'detour-oneway-icon',
   iconSize: [32, 32],
+  iconAnchor: [0, 0]
 });
 
 const detourTwoWayIcon = () => new L.DivIcon({
@@ -150,6 +154,7 @@ const detourTwoWayIcon = () => new L.DivIcon({
   </div>`,
   className: 'detour-twoway-icon',
   iconSize: [32, 32],
+  iconAnchor: [0, 0]
 });
 
 const publicEventIcon = () => new L.DivIcon({
@@ -158,6 +163,7 @@ const publicEventIcon = () => new L.DivIcon({
   </div>`,
   className: 'public-event-icon',
   iconSize: [32, 32],
+  iconAnchor: [0, 0]
 });
 
 const roadClosureIcon = () => new L.DivIcon({
@@ -166,6 +172,7 @@ const roadClosureIcon = () => new L.DivIcon({
   </div>`,
   className: 'road-closure-icon',
   iconSize: [32, 32],
+  iconAnchor: [0, 0]
 });
 
 const ThemeToggle = () => {
@@ -212,6 +219,19 @@ const MapComponent = () => {
   const [expiryType, setExpiryType] = useState('duration');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [hiddenIncidentTypes, setHiddenIncidentTypes] = useState(new Set());
+
+  const toggleIncidentType = (type) => {
+    setHiddenIncidentTypes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(type)) {
+        newSet.delete(type);
+      } else {
+        newSet.add(type);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -308,43 +328,39 @@ const MapComponent = () => {
   };
 
   const renderIncidentMarkers = (coordinates, type, isDrawing = false) => {
-    const color = INCIDENT_TYPES[type]?.color || '#000000';
-    
-    const defaultPathOptions = {
-      weight: 3,
-      opacity: 0.8,
-    };
-
+    if (hiddenIncidentTypes.has(type)) return null;
+    const color = isDrawing ? '#3388ff' : INCIDENT_TYPES[type]?.color || '#3388ff';
     const getPathOptions = (type) => {
+      const baseOptions = {
+        color: INCIDENT_TYPES[type]?.color || color,
+        weight: 5,
+        opacity: 1
+      };
+
       switch(type) {
         case 'COLLISION':
-          return { ...defaultPathOptions, color: '#F44336', dashArray: '8, 12' };
+          return {
+            ...baseOptions,
+            opacity: 0,
+            dashArray: '10, 10',
+            weight: 4
+          };
         case 'CONSTRUCTION':
-          return { ...defaultPathOptions, color: '#FF9800', dashArray: '10, 10' };
+          return {
+            ...baseOptions,
+            opacity: 0,
+            dashArray: '15, 10',
+            weight: 4
+          };
         case 'FLOODING':
-          return { ...defaultPathOptions, color: '#2196F3', dashArray: '5, 10' };
-        case 'DETOUR_ONE_WAY':
-        case 'DETOUR_TWO_WAY':
-          return { ...defaultPathOptions, color: '#4CAF50', dashArray: '15, 10', lineCap: 'round' };
-        case 'PUBLIC_EVENT':
-          return { ...defaultPathOptions, color: '#8e44ad', dashArray: '10, 10' };
-        case 'ROAD_CLOSURE':
-          return { ...defaultPathOptions, color: '#e74c3c', dashArray: '15, 5' };
+          return {
+            ...baseOptions,
+            opacity: 0,
+            dashArray: '5, 10',
+            weight: 4
+          };
         default:
-          return { ...defaultPathOptions, color };
-      }
-    };
-
-    const getMarkerIcon = (type) => {
-      switch(type) {
-        case 'COLLISION': return collisionIcon;
-        case 'CONSTRUCTION': return constructionIcon;
-        case 'FLOODING': return floodingIcon;
-        case 'DETOUR_ONE_WAY': return detourOneWayIcon;
-        case 'DETOUR_TWO_WAY': return detourTwoWayIcon;
-        case 'PUBLIC_EVENT': return publicEventIcon;
-        case 'ROAD_CLOSURE': return roadClosureIcon;
-        default: return null;
+          return baseOptions;
       }
     };
 
@@ -353,11 +369,11 @@ const MapComponent = () => {
         <CircleMarker
           key={`${isDrawing ? 'drawing' : 'incident'}-${index}`}
           center={point}
-          radius={5}
+          radius={1}
           pathOptions={{
             color: color,
             fillColor: color,
-            fillOpacity: 0.7
+            fillOpacity: 0.1
           }}
         />
       ));
@@ -366,10 +382,25 @@ const MapComponent = () => {
     return (
       <>
         {coordinates.length > 1 && (
-          <Polyline
-            positions={coordinates}
-            pathOptions={getPathOptions(type)}
-          />
+          <>
+            <Polyline
+              positions={coordinates}
+              pathOptions={getPathOptions(type)}
+            />
+            {coordinates.map((point, index) => (
+              <CircleMarker
+                key={`connection-${index}`}
+                center={point}
+                radius={0.5}
+                pathOptions={{
+                  color: INCIDENT_TYPES[type]?.color || color,
+                  fillColor: INCIDENT_TYPES[type]?.color || color,
+                  fillOpacity: 0.5,
+                  weight: 0
+                }}
+              />
+            ))}
+          </>
         )}
         {coordinates.map((point, index) => (
           <Marker
@@ -382,8 +413,21 @@ const MapComponent = () => {
     );
   };
 
+  const getMarkerIcon = (type) => {
+    switch(type) {
+      case 'COLLISION': return collisionIcon;
+      case 'CONSTRUCTION': return constructionIcon;
+      case 'FLOODING': return floodingIcon;
+      case 'DETOUR_ONE_WAY': return detourOneWayIcon;
+      case 'DETOUR_TWO_WAY': return detourTwoWayIcon;
+      case 'PUBLIC_EVENT': return publicEventIcon;
+      case 'ROAD_CLOSURE': return roadClosureIcon;
+      default: return null;
+    }
+  };
+
   return (
-    <div className="client-container">
+    <div className="master-container">
       <div className="map-section">
         <MapContainer
           center={[13.6373, 123.1854]}
@@ -527,13 +571,14 @@ const MapComponent = () => {
         </div>
       </div>
       <div className="incidents-section">
-        <h3>Active Incidents</h3>
         <Clock />
-        <ActiveIncidentsList
-          incidents={incidents}
+        <IncidentPanel
+          incidents={incidents.filter(inc => !hiddenIncidentTypes.has(inc.type))}
           selectedIncident={selectedIncident}
           onSelectIncident={setSelectedIncident}
           onDeleteIncident={handleDeleteIncident}
+          hiddenIncidentTypes={hiddenIncidentTypes}
+          onToggleIncidentType={toggleIncidentType}
         />
       </div>
     </div>

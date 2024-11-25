@@ -1,0 +1,58 @@
+.incidents-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+}
+
+.incidents-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.incident-item {
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.incident-item:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--control-shadow);
+}
+
+.incident-item.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.incident-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.incident-type {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.incident-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.incident-details {
+  font-size: 0.9em;
+  color: var(--text-color-secondary);
+}
+
+.incident-time {
+  margin-top: var(--spacing-xs);
+  font-size: 0.85em;
+  color: var(--text-color-secondary);
+}

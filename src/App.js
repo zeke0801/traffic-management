@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MasterMapComponent from './components/Map/MasterMapComponent';
-import ClientView from './pages/ClientView';
 import './App.css';
 import nagaImage from './svg/naga.jpg';
 
@@ -63,7 +62,6 @@ function App() {
           </div>
         } />
         <Route path="/master" element={<MasterMapComponent />} />
-        <Route path="/client" element={<ClientView />} />
       </Routes>
     </Router>
   );

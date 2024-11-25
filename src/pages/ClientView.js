@@ -1,10 +1,10 @@
 import React from 'react';
-import ClientMapComponent from '../components/Map/ClientMapComponent';
+import ClientComponent from '../components/Map/ClientComponent';
 
 const ClientView = () => {
   return (
     <div className="client-view">
-      <ClientMapComponent />
+      <ClientComponent />
     </div>
   );
 };

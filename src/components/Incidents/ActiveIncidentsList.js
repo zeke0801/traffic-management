@@ -1,7 +1,7 @@
 import React from 'react';
 import { INCIDENT_TYPES, calculateTimeRemaining } from '../../constants/incidentTypes';
 import IncidentLegend from './IncidentLegend';
-import './ActiveIncidentsList.css';
+import styles from './ActiveIncidentsList.module.css';
 
 const ActiveIncidentsList = ({ 
   incidents, 
@@ -10,27 +10,27 @@ const ActiveIncidentsList = ({
   onDeleteIncident 
 }) => {
   return (
-    <div className="incidents-content">
-      <div className="incidents-grid">
+    <div className={styles['incidents-content']}>
+      <div className={styles['incidents-grid']}>
         {incidents.map((incident) => (
           <div 
             key={incident._id} 
-            className={`incident-item ${selectedIncident === incident._id ? 'selected' : ''}`}
+            className={`${styles['incident-item']} ${selectedIncident === incident._id ? styles.selected : ''}`}
             onClick={() => onSelectIncident(incident._id)}
           >
-            <div className="incident-header">
+            <div className={styles['incident-header']}>
               <span 
-                className="incident-type"
+                className={styles['incident-type']}
                 style={{ color: INCIDENT_TYPES[incident.type].color }}
               >
                 {INCIDENT_TYPES[incident.type].name}
               </span>
-              <span className="incident-time">
+              <span className={styles['incident-time']}>
                 {calculateTimeRemaining(incident.expiryTime)}
               </span>
             </div>
-            <div className="incident-description">{incident.description}</div>
-            <div className="incident-footer">
+            <div className={styles['incident-description']}>{incident.description}</div>
+            <div className={styles['incident-footer']}>
               {onDeleteIncident && (
                 <button 
                   className="delete-button"
@@ -46,7 +46,7 @@ const ActiveIncidentsList = ({
           </div>
         ))}
       </div>
-      <div className="legend-wrapper">
+      <div className={styles['legend-wrapper']}>
         <IncidentLegend />
       </div>
     </div>

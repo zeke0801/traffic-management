@@ -17,7 +17,7 @@ export const INCIDENT_TYPES = {
     name: 'Construction',
     symbol: constructionPng,
     description: 'Road construction or maintenance',
-    color: '#ffa700'
+    color: '#fb00ff'
   },
   FLOODING: {
     name: 'Flooding',
@@ -29,7 +29,7 @@ export const INCIDENT_TYPES = {
     name: 'Public Event',
     symbol: publiceventPng,
     description: 'Parades, festivals, or public gatherings',
-    color: '#8e44ad'
+    color: '#ffdd00'
   },
   ROAD_CLOSURE: {
     name: 'Road Closure',
@@ -47,7 +47,7 @@ export const INCIDENT_TYPES = {
     name: 'Detour: Two Way',
     symbol: detourboth,
     description: 'Two-way alternative route',
-    color: '#2c3e50'
+    color: '#45e600'
   }
 };
 
