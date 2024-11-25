@@ -53,12 +53,12 @@ export const INCIDENT_TYPES = {
 };
 
 export const formatRecordedDate = (dateString) => {
-  if (!dateString) return 'No date recorded';
+  if (!dateString) return 'Date and Time not recorded';
   try {
     const date = new Date(dateString);
     // Add 8 hours for PHT
     date.setHours(date.getHours() + 8);
-    return format(date, 'MMM d, yyyy, hh:mm a');
+    return format(date, 'MMMM d, yyyy h:mm aa');
   } catch (error) {
     console.error('Error formatting date:', error);
     return 'Invalid date';

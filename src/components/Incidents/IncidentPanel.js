@@ -50,7 +50,7 @@ const IncidentPanel = ({
               </div>
               <div className={styles.reportTime}>
                 <div className={styles.recordedDate}>
-                  Recorded: {formatRecordedDate(incident.recordedAt || incident.startTime)}
+                  <strong>Date and Time Recorded:</strong> {formatRecordedDate(incident.recordedAt)}
                 </div>
               </div>
             </div>
