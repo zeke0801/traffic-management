@@ -1,5 +1,5 @@
 import React from 'react';
-import { INCIDENT_TYPES } from '../../constants/incidentTypes';
+import { INCIDENT_TYPES, calculateTimeRemaining } from '../../constants/incidentTypes';
 import styles from './IncidentPanel.module.css';
 
 const IncidentPanel = ({ 
@@ -10,7 +10,6 @@ const IncidentPanel = ({
   hiddenIncidentTypes,
   onToggleIncidentType
 }) => {
-  console.log('IncidentPanel received incidents:', incidents);
   return (
     <div className={styles.panel}>
       
@@ -19,45 +18,41 @@ const IncidentPanel = ({
       <div className={styles.reportsSection}>
         <h3>Active Reports</h3>
         <div className={styles.reportsGrid}>
-          {incidents && incidents.length > 0 ? (
-            incidents.map((incident) => {
-              console.log('Rendering incident:', incident);
-              return (
-                <div 
-                  key={incident._id} 
-                  className={`${styles.reportItem} ${selectedIncident === incident._id ? styles.selected : ''}`}
-                  onClick={() => onSelectIncident(incident._id)}
-                >
-                  <div className={styles.reportHeader}>
-                    <span className={styles.reportType}>
-                      <img 
-                        src={INCIDENT_TYPES[incident.type].symbol} 
-                        alt={incident.type} 
-                        className={styles.reportIcon} 
-                      />
-                      {INCIDENT_TYPES[incident.type].name}
-                    </span>
-                    {onDeleteIncident && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteIncident(incident._id);
-                        }}
-                        className={styles.deleteButton}
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                  <div className={styles.reportDetails}>
-                    {incident.description || 'No description provided'}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div>No active reports</div>
-          )}
+          {incidents.map((incident) => (
+            <div 
+              key={incident._id} 
+              className={`${styles.reportItem} ${selectedIncident === incident._id ? styles.selected : ''}`}
+              onClick={() => onSelectIncident(incident._id)}
+            >
+              <div className={styles.reportHeader}>
+                <span className={styles.reportType}>
+                  <img 
+                    src={INCIDENT_TYPES[incident.type].symbol} 
+                    alt={incident.type} 
+                    className={styles.reportIcon} 
+                  />
+                  {INCIDENT_TYPES[incident.type].name}
+                </span>
+                {onDeleteIncident && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteIncident(incident._id);
+                    }}
+                    className={styles.deleteButton}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+              <div className={styles.reportDetails}>
+                {incident.description || 'No description provided'}
+              </div>
+              <div className={styles.reportTime}>
+                {calculateTimeRemaining(incident.startTime, incident.duration, incident.durationUnit)}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
       {/* Legend Section */}

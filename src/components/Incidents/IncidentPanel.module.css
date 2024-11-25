@@ -127,16 +127,8 @@
 }
 
 .reportTime {
-  font-size: 0.9em;
-  color: #666;
-  margin-top: 8px;
-}
-
-.recordedDate {
-  font-size: 0.85em;
-  color: #888;
-  margin-top: 4px;
-  font-style: italic;
+  font-size: 0.8rem;
+  color: #b0b0b0;
 }
 
 .deleteButton {
