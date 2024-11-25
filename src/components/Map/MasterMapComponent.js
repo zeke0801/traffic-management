@@ -14,7 +14,6 @@ import detourBothWay from '../../svg/detour-bothway.png';
 import publicEventPng from '../../svg/publicevent.png';
 import closedRoadPng from '../../svg/closedroad.png';
 import { format } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
 
 const MapControls = () => {
   const [isSpacePressed, setIsSpacePressed] = useState(false);
@@ -286,8 +285,8 @@ const MapComponent = () => {
         }
         // Always use current time for start time
         const currentTime = new Date();
-        const zonedTime = utcToZonedTime(currentTime, 'Asia/Manila');
-        startTime = zonedTime;
+        currentTime.setHours(currentTime.getHours() + 8);
+        startTime = currentTime;
         const hours = calculatedDurationUnit === DURATION_UNITS.HOURS ? 
           calculatedDuration : calculatedDuration * 24;
         expiryTime = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
@@ -329,11 +328,11 @@ const MapComponent = () => {
         type: selectedIncidentType,
         coordinates: currentPath,
         description: description || 'No description provided',
-        startTime: format(startTime, 'yyyy-MM-dd\'T\'HH:mm:ssxxx'),
-        expiryTime: format(expiryTime, 'yyyy-MM-dd\'T\'HH:mm:ssxxx'),
+        startTime: startTime.toISOString(),
+        expiryTime: expiryTime.toISOString(),
         duration: calculatedDuration,
         durationUnit: calculatedDurationUnit,
-        recordedAt: format(new Date(), 'yyyy-MM-dd\'T\'HH:mm:ssxxx') // Add explicit recording time
+        recordedAt: startTime.toISOString()
       };
 
       await createIncident(incidentData);
