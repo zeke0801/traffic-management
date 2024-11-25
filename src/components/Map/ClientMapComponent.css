@@ -2,12 +2,94 @@
   display: flex;
   height: 100vh;
   width: 100%;
+  background-color: var(--background-color);
 }
 
 .map-section {
   flex: 1;
-  height: 100%;
   position: relative;
+  height: 100%;
+  background-color: var(--map-background);
+}
+
+.map-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.info-section {
+  width: 300px;
+  padding: 20px;
+  background-color: var(--sidebar-background);
+  color: var(--text-color);
+  overflow-y: auto;
+}
+
+.datetime-display {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  font-size: 0.9em;
+  color: #333;
+}
+
+.clock {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.date {
+  color: #666;
+}
+
+.vehicle-collision-icon,
+.construction-icon,
+.flooding-icon,
+.public-event-icon,
+.road-closure-icon,
+.detour-oneway-icon,
+.detour-twoway-icon {
+  background: none;
+  border: none;
+}
+
+.vehicle-collision-icon img,
+.construction-icon img,
+.flooding-icon img,
+.public-event-icon img,
+.road-closure-icon img,
+.detour-oneway-icon img,
+.detour-twoway-icon img {
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+  transition: transform 0.2s ease;
+}
+
+.vehicle-collision-icon img:hover,
+.construction-icon img:hover,
+.flooding-icon img:hover,
+.public-event-icon img:hover,
+.road-closure-icon img:hover,
+.detour-oneway-icon img:hover,
+.detour-twoway-icon img:hover {
+  transform: scale(1.1);
+}
+
+.error-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 0, 0, 0.8);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 4px;
+  z-index: 1000;
 }
 
 .incidents-section {
@@ -109,36 +191,6 @@
   padding: 20px;
   color: #666;
   font-style: italic;
-}
-
-.error-message {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10000;
-  background-color: #dc3545;
-  color: white;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--border-radius-md);
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
-  font-weight: 500;
-  text-align: center;
-  pointer-events: none;
-  max-width: 80%;
-  width: fit-content;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.error-message span {
-  display: block;
-}
-
-.error-message .error-retry {
-  font-size: var(--font-size-sm);
-  opacity: 0.9;
 }
 
 .loading-spinner {

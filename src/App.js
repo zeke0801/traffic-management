@@ -1,27 +1,68 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import MapComponent from './components/Map/MapComponent';
+import MasterMapComponent from './components/Map/MasterMapComponent';
 import ClientView from './pages/ClientView';
-import './styles/Map.css';
 import './App.css';
+import nagaImage from './svg/naga.jpg';
 
 function App() {
   return (
     <Router>
+      <ul className="background">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
       <Routes>
         <Route path="/" element={
           <div>
             <div className="welcome-screen">
-              <h1>Traffic Alert System - Naga City</h1>
-              <p>Choose your view:</p>
-              <div className="view-buttons">
-                <Link to="/master" className="view-button master">CeSAR Client</Link>
-                <Link to="/client" className="view-button client">Public View</Link>
+              <div className="login-container">
+                <div className="login-left">
+                  <img src={nagaImage} alt="Traffic Management System" className="login-image" />
+                </div>
+                <div className="login-right">
+                  <h2>CMS - Naga City</h2>
+                  <h1><span>Hello,</span> <br />welcome!</h1>
+                  <div className="credentials-container">
+                    <input type="text" placeholder="Username" className="credential-input" />
+                    <input type="password" placeholder="Password" className="credential-input" />
+                    <button className="login-button" path="/master">Login</button>
+                  </div>
+                  <div className="social-follow">
+                    <span>FOLLOW</span>
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+                      <i className="fab fa-facebook"></i>
+                    </a>
+                  </div>
+                </div>
               </div>
+              <div className="footer-text">experimental - zeke</div>
             </div>
           </div>
         } />
-        <Route path="/master" element={<MapComponent />} />
+        <Route path="/master" element={<MasterMapComponent />} />
         <Route path="/client" element={<ClientView />} />
       </Routes>
     </Router>

@@ -1,0 +1,604 @@
+:root {
+  /* Light theme variables */
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --text-color-secondary: #666666;
+  --text-color-inverse: #ffffff;
+  --border-color: rgba(0, 0, 0, 0.15);
+  --control-bg: rgba(255, 255, 255, 0.95);
+  --control-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --hover-bg: #f0f0f0;
+  
+  /* Button colors - Light theme */
+  --primary-color: #4285f4;
+  --primary-color-hover: #357abd;
+  --success-color: #34a853;
+  --success-color-hover: #2d8a46;
+  --danger-color: #ea4335;
+  --danger-color-hover: #d33426;
+  --warning-color: #fbbc05;
+  --warning-color-hover: #f2b600;
+  
+  /* Form and UI - Light theme */
+  --disabled-bg: #f5f5f5;
+  --text-color-disabled: #999999;
+  --input-bg: #ffffff;
+  --input-border: #dddddd;
+  
+  /* Spacing and sizing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --border-radius: 4px;
+  --border-radius-sm: 2px;
+  --border-radius-md: 6px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+}
+
+[data-theme="dark"] {
+  /* Dark theme variables */
+  --bg-color: #1a1a1a;
+  --text-color: #e1e1e1;
+  --text-color-secondary: #b0b0b0;
+  --text-color-inverse: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.15);
+  --control-bg: rgba(40, 40, 40, 0.95);
+  --control-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --hover-bg: #2c2c2c;
+  
+  /* Button colors - Dark theme */
+  --primary-color: #5c9aff;
+  --primary-color-hover: #4285f4;
+  --success-color: #40c463;
+  --success-color-hover: #34a853;
+  --danger-color: #f85149;
+  --danger-color-hover: #ea4335;
+  --warning-color: #ffd33d;
+  --warning-color-hover: #fbbc05;
+  
+  /* Form and UI - Dark theme */
+  --disabled-bg: #2d333b;
+  --text-color-disabled: #666666;
+  --input-bg: #2d333b;
+  --input-border: #444444;
+}
+
+/* Theme toggle styles */
+.theme-toggle {
+  display: none; /* Hide the theme toggle */
+  position: absolute;
+  left: 10px;
+  bottom: 95px;
+  z-index: 1000;
+  background-color: var(--control-bg);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--control-shadow);
+}
+
+.theme-toggle button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: var(--border-radius-md);
+  transition: background-color 0.2s;
+}
+
+.theme-toggle button:hover {
+  background-color: var(--hover-bg);
+}
+
+.theme-toggle i {
+  font-size: 16px;
+}
+
+/* Apply theme colors to existing elements */
+.client-container {
+  background-color: var(--bg-color);
+}
+
+.incidents-section {
+  background-color: var(--control-bg);
+  color: var(--text-color);
+  border-left: 1px solid var(--border-color);
+}
+
+.incident-reporting {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  z-index: 1000;
+  background-color: var(--control-bg);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--control-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  max-width: 300px;
+  border: 1px solid var(--border-color);
+}
+
+.map-controls {
+  display: none; /* Hide the old class */
+}
+
+.incidents-section h3 {
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.clock, .date {
+  color: var(--text-color);
+  background-color: var(--control-bg);
+  border-color: var(--border-color);
+}
+
+select, input, textarea {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+}
+
+select:focus, input:focus, textarea:focus {
+  border-color: #2196F3;
+}
+
+.client-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.map-section {
+  flex: 0 0 80%;
+  height: 100vh;
+  position: relative;
+  z-index: 2;
+}
+
+.incidents-section {
+  flex: 0 0 20%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.incidents-section h3 {
+  margin: 0;
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-md);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.clock, .date {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  font-family: monospace;
+}
+
+.map-instructions {
+  position: absolute;
+  top: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 0.125rem 0.25rem rgb(255, 255, 255);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  text-align: center;
+  pointer-events: none;
+  max-width: 80%;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.instruction-text {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-weight: 500;
+}
+
+kbd {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+  pointer-events: none;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.incident-type-select,
+.description-input,
+.expiry-type-select,
+.duration-input,
+.duration-unit-select,
+.expiry-date-input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.expiry-type-select{
+  margin-bottom: .5rem;
+}
+
+.duration-inputs {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.duration-input {
+  width: 70px;
+}
+
+.duration-unit-select {
+  flex: 1;
+}
+
+.control-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--border-radius);
+  background-color: var(--primary-color);
+  color: var(--text-color-inverse);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background-color 0.3s;
+}
+
+.control-button:hover {
+  background-color: var(--primary-color-hover);
+}
+
+.control-button.active {
+  background-color: var(--danger-color);
+}
+
+.control-button.complete {
+  background-color: var(--success-color);
+}
+
+.control-button.complete:hover {
+  background-color: var(--success-color-hover);
+}
+
+.control-button.cancel {
+  background-color: var(--danger-color);
+}
+
+.control-button.cancel:hover {
+  background-color: var(--danger-color-hover);
+}
+
+.control-button.update {
+  background-color: var(--warning-color);
+  color: var(--text-color);
+}
+
+.control-button.update:hover {
+  background-color: var(--warning-color-hover);
+}
+
+.incident-type-select,
+.expiry-type-select,
+.duration-unit,
+.incident-description,
+.expiry-date,
+.drawing-mode-select {
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  width: 100%;
+  background-color: var(--control-bg);
+  color: var(--text-color);
+}
+
+.drawing-mode-select:disabled {
+  background-color: var(--disabled-bg);
+  cursor: not-allowed;
+  color: var(--text-color-disabled);
+}
+
+.duration-inputs {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.duration-value {
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+  width: 80px;
+  background-color: var(--control-bg);
+  color: var(--text-color);
+}
+
+.duration-unit {
+  flex: 1;
+}
+
+.vehicle-collision-icon,
+.construction-icon,
+.flooding-icon,
+.public-event-icon,
+.road-closure-icon,
+.detour-oneway-icon,
+.detour-twoway-icon {
+  background: none;
+  border: none;
+}
+
+.vehicle-collision-icon svg,
+.construction-icon svg,
+.flooding-icon svg {
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.7));
+  transform: scale(1.2);
+}
+
+.public-event-icon img,
+.road-closure-icon img {
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+  transition: transform 0.2s ease;
+}
+
+.public-event-icon img:hover,
+.road-closure-icon img:hover {
+  transform: scale(1.1);
+}
+
+.no-expiry-note {
+  padding: 8px;
+  color: #666;
+  font-size: 0.9em;
+  font-style: italic;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.specific-time-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.time-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.time-input-group label {
+  font-size: 0.9em;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.time-input {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.legend {
+  position: absolute;
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+  background-color: var(--control-bg);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--control-shadow);
+  z-index: 1000;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+}
+
+.legend-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: var(--spacing-sm);
+}
+
+.legend-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-color);
+}
+
+/* Leaflet zoom control theming */
+.leaflet-control-zoom {
+  border: none !important;
+  box-shadow: var(--control-shadow) !important;
+}
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  background-color: var(--control-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  font-size: 18px !important;
+}
+
+.leaflet-control-zoom-in {
+  border-top-left-radius: 4px !important;
+  border-top-right-radius: 4px !important;
+}
+
+.leaflet-control-zoom-out {
+  border-bottom-left-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+  border-top: none !important;
+}
+
+.leaflet-control-zoom-in:hover,
+.leaflet-control-zoom-out:hover {
+  background-color: var(--hover-bg) !important;
+  color: var(--text-color) !important;
+}
+
+/* Disable default Leaflet zoom control focus outline and add our own */
+.leaflet-control-zoom a:focus {
+  outline: none !important;
+  background-color: var(--hover-bg) !important;
+}
+
+/* Incident List and Types Theming */
+.incident-list,
+.incident-types {
+  background-color: var(--control-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--control-shadow) !important;
+}
+
+.incident-list-header,
+.incident-types-header {
+  background-color: var(--control-bg) !important;
+  color: var(--text-color) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+.incident-list-item,
+.incident-type-item {
+  border-bottom: 1px solid var(--border-color) !important;
+  background-color: var(--control-bg) !important;
+  color: var(--text-color) !important;
+}
+
+.incident-list-item:hover,
+.incident-type-item:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+.incident-list-item:last-child,
+.incident-type-item:last-child {
+  border-bottom: none !important;
+}
+
+.incident-list-item.selected,
+.incident-type-item.selected {
+  background-color: var(--hover-bg) !important;
+}
+
+/* Scrollbar styling for incident lists */
+.incident-list::-webkit-scrollbar,
+.incident-types::-webkit-scrollbar {
+  width: 8px;
+}
+
+.incident-list::-webkit-scrollbar-track,
+.incident-types::-webkit-scrollbar-track {
+  background: var(--control-bg);
+}
+
+.incident-list::-webkit-scrollbar-thumb,
+.incident-types::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+  border: 2px solid var(--control-bg);
+}
+
+.incident-list::-webkit-scrollbar-thumb:hover,
+.incident-types::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-color);
+}
+
+/* Incident details and timestamps */
+.incident-details,
+.incident-timestamp {
+  color: var(--text-color-secondary) !important;
+}
+
+/* Status indicators and badges */
+.status-badge,
+.type-badge {
+  background-color: var(--hover-bg) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+@media (max-width: 768px) {
+  .client-container {
+    flex-direction: column;
+  }
+
+  .map-section {
+    height: 80vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    flex: none;
+  }
+
+  .incidents-section {
+    height: 20vh;
+    flex: none;
+  }
+
+  .incident-reporting {
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    max-width: calc(100% - 2 * var(--spacing-md));
+  }
+
+  .map-instructions {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .incident-reporting {
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    padding: var(--spacing-sm);
+  }
+
+  .control-button {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
