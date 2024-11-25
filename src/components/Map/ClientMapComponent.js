@@ -156,20 +156,15 @@ const ClientMapComponent = () => {
   const [incidents, setIncidents] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadIncidents = async () => {
       try {
-        setLoading(true);
-        setError(null);
         const data = await fetchIncidents();
         setIncidents(data);
       } catch (err) {
         setError('Failed to load incidents');
         console.error('Error loading incidents:', err);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -275,33 +270,19 @@ const ClientMapComponent = () => {
           {incidents.map((incident) => (
             <React.Fragment key={incident._id}>
               {renderIncidentMarkers(incident.coordinates, incident.type)}
-              <GeoJSON
-                data={{
-                  type: 'LineString',
-                  coordinates: incident.coordinates.map(coord => [coord[1], coord[0]])
-                }}
-                style={() => ({
-                  color: INCIDENT_TYPES[incident.type]?.color || '#000000',
-                  weight: 3,
-                  opacity: 0.7,
-                })}
-                onClick={() => setSelectedIncident(incident._id)}
-              />
             </React.Fragment>
           ))}
           <IncidentLegend />
         </MapContainer>
         <Clock />
       </div>
-      <div className="incidents-section">
-        <h3>Active Incidents</h3>
+      <div className="info-section">
         <ActiveIncidentsList 
           incidents={incidents}
-          loading={loading}
-          error={error}
           selectedIncident={selectedIncident}
           onSelectIncident={setSelectedIncident}
         />
+        <IncidentLegend />
       </div>
       <div className="map-instructions">
         <span className="instruction-text">
