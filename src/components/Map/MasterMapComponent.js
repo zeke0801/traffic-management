@@ -259,34 +259,59 @@ const MapComponent = () => {
     setCurrentPath([...currentPath, [latlng.lat, latlng.lng]]);
   };
 
-  const calculateExpiryTime = () => {
-    if (expiryType === 'duration') {
-      const now = new Date();
-      const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
-      return new Date(now.getTime() + hours * 60 * 60 * 1000).toISOString();
-    }
-    if (expiryType === 'specific') {
-      return endDate ? new Date(endDate).toISOString() : null;
-    }
-    return null;
-  };
-
   const handleDrawingComplete = async () => {
-    if (currentPath.length === 0) return;
+    if (currentPath.length === 0) {
+      setError('Please draw the incident path first');
+      return;
+    }
+
+    if (!selectedIncidentType) {
+      setError('Please select an incident type');
+      return;
+    }
 
     try {
       setError(null);
 
-      const expiryTime = calculateExpiryTime();
-      const startTime = startDate ? new Date(startDate).toISOString() : null;
+      let startTime, expiryTime;
 
-      await createIncident({
+      if (expiryType === 'duration') {
+        if (!duration || duration <= 0) {
+          setError('Please set a valid duration');
+          return;
+        }
+        startTime = startDate ? new Date(startDate) : new Date();
+        const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
+        expiryTime = new Date(startTime.getTime() + hours * 60 * 60 * 1000);
+      } else {
+        // specific time range
+        if (!startDate || !endDate) {
+          setError('Please set both start and end dates');
+          return;
+        }
+        startTime = new Date(startDate);
+        expiryTime = new Date(endDate);
+        if (expiryTime <= startTime) {
+          setError('End date must be after start date');
+          return;
+        }
+        // Calculate duration in hours
+        const durationHours = (expiryTime - startTime) / (1000 * 60 * 60);
+        duration = durationHours;
+        durationUnit = DURATION_UNITS.HOURS;
+      }
+
+      const incidentData = {
         type: selectedIncidentType,
         coordinates: currentPath,
-        description,
-        expiryTime,
-        startTime
-      });
+        description: description || 'No description provided',
+        startTime: startTime.toISOString(),
+        expiryTime: expiryTime.toISOString(),
+        duration: duration,
+        durationUnit: durationUnit
+      };
+
+      await createIncident(incidentData);
 
       // Reset form
       setCurrentPath([]);
@@ -298,8 +323,8 @@ const MapComponent = () => {
       setStartDate('');
       setEndDate('');
     } catch (err) {
-      setError('Failed to create incident. Please try again.');
       console.error('Error creating incident:', err);
+      setError('Failed to create incident. Please try again.');
     }
   };
 

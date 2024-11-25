@@ -56,24 +56,54 @@ export const DURATION_UNITS = {
   DAYS: 'days'
 };
 
-export const calculateTimeRemaining = (expiryTime) => {
+export const calculateTimeRemaining = (startTime, duration, durationUnit) => {
   const now = new Date();
-  const expiry = new Date(expiryTime);
-  const diff = expiry - now;
-
-  if (diff <= 0) return 'Expired';
-
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (hours > 24) {
-    const days = Math.floor(hours / 24);
-    return `${days} day${days > 1 ? 's' : ''} remaining`;
+  
+  // If using specific time range
+  if (!duration && startTime) {
+    const start = new Date(startTime);
+    const diff = start - now;
+    
+    if (diff <= 0) return 'In progress';
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `Starts in ${days} day${days > 1 ? 's' : ''}`;
+    }
+    
+    if (hours > 0) {
+      return `Starts in ${hours}h ${minutes}m`;
+    }
+    
+    return `Starts in ${minutes}m`;
   }
-
-  if (hours > 0) {
-    return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} min remaining`;
+  
+  // If using duration
+  if (duration) {
+    const hours = durationUnit === DURATION_UNITS.HOURS ? duration : duration * 24;
+    const start = startTime ? new Date(startTime) : now;
+    const end = new Date(start.getTime() + hours * 60 * 60 * 1000);
+    const diff = end - now;
+    
+    if (diff <= 0) return 'Expired';
+    
+    const remainingHours = Math.floor(diff / (1000 * 60 * 60));
+    const remainingMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (remainingHours > 24) {
+      const days = Math.floor(remainingHours / 24);
+      return `${days} day${days > 1 ? 's' : ''} remaining`;
+    }
+    
+    if (remainingHours > 0) {
+      return `${remainingHours}h ${remainingMinutes}m remaining`;
+    }
+    
+    return `${remainingMinutes}m remaining`;
   }
-
-  return `${minutes} min remaining`;
+  
+  return 'No duration set';
 };
