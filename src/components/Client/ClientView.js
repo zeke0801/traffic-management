@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, ZoomControl, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, ZoomControl, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './ClientView.css';
 import { fetchIncidents } from '../../services/api';
@@ -56,17 +56,15 @@ const ClientView = () => {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' />
             <ZoomControl position="bottomleft" />
             {incidents.map((incident) => (
-              <GeoJSON
+              <Polyline
                 key={incident._id}
-                data={{
-                  type: 'LineString',
-                  coordinates: incident.coordinates
-                }}
-                style={() => ({
+                positions={incident.coordinates}
+                pathOptions={{
                   color: getIncidentColor(incident.type),
                   weight: 3,
                   opacity: 0.7,
-                })} />
+                }}
+              />
             ))}
           </MapContainer>
         </div>
