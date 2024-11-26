@@ -21,11 +21,10 @@ const generateDailyHash = (prefix) => {
 // Get the routes for the current day
 export const getRoutes = () => {
   const masterHash = generateDailyHash('master');
-  const clientHash = generateDailyHash('client');
 
   return {
     master: `/${masterHash}`,
-    client: `/${clientHash}`,
+    client: '/client', // Keep client route public
   };
 };
 
