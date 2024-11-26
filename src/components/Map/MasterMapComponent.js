@@ -272,6 +272,7 @@ const MapComponent = () => {
         type: selectedIncidentType,
         coordinates: currentPath,
         description: description || 'No description provided',
+        status: 'ACTIVE'
       };
 
       await createIncident(incidentData);

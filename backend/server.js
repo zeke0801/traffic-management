@@ -48,7 +48,7 @@ const incidentSchema = new mongoose.Schema({
   type: String,
   coordinates: [[Number]], // Array of [lat, lng] pairs
   description: String,
-  expiryTime: Date,
+  expiryTime: { type: Date, required: false },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -64,10 +64,7 @@ const User = mongoose.model('User', userSchema);
 // Routes
 app.get('/api/incidents', async (req, res) => {
   try {
-    const currentTime = new Date();
-    const incidents = await Incident.find({
-      expiryTime: { $gt: currentTime }
-    }).sort({ createdAt: -1 });
+    const incidents = await Incident.find().sort({ createdAt: -1 });
     res.json(incidents);
   } catch (error) {
     console.error('Error fetching incidents:', error);
@@ -78,7 +75,10 @@ app.get('/api/incidents', async (req, res) => {
 app.post('/api/incidents', async (req, res) => {
   try {
     console.log('Received incident data:', req.body);
-    const incident = new Incident(req.body);
+    const incident = new Incident({
+      ...req.body,
+      expiryTime: req.body.expiryTime || new Date(Date.now() + 24 * 60 * 60 * 1000) // Default 24 hours if not provided
+    });
     await incident.save();
     res.status(201).json(incident);
   } catch (error) {
