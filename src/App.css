@@ -460,13 +460,18 @@ body {
   font-size: 2.5rem;
   margin-bottom: 1rem;
   color: #8e00c2;
+  font-weight: lighter;
+}
+
+.login-right span {
+  font-weight: bold;
 }
 
 .login-right h2 {
   width: 100%;
   text-align: left;
   font-size: 1rem;
-  color: #8e00c24f;
+  color: #8e00c27c;
   margin-bottom: 1.5rem;
 }
 

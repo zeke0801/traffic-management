@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import nagaImage from '../../svg/naga.jpg';
 //LoginForm css is within app.css
 
@@ -85,14 +85,12 @@ function LoginForm(props) {
             <a href="https://www.facebook.com/NagaCityGovernment" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-facebook"></i>
             </a>
-            <span style={{ marginLeft: '20px' }}>|</span>
-            <a href="/credits" style={{ textDecoration: 'none', color: '#4a90e2', marginLeft: '20px' }}>
-              Credits
-            </a>
+
+
           </div>
         </div>
       </div>
-      <div className="footer-text">experimental - zeke</div>
+      <Link to="/credits" className="footer-text">experimental - zeke</Link>
     </div>
   );
 }
