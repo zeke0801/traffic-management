@@ -208,6 +208,7 @@ const ThemeToggle = () => {
 };
 
 const MapComponent = () => {
+  const mapRef = useRef(null);
   const [incidents, setIncidents] = useState([]);
   const [error, setError] = useState(null);
   const [currentPath, setCurrentPath] = useState([]);
@@ -431,6 +432,24 @@ const MapComponent = () => {
     }
   };
 
+  const MapEvents = () => {
+    const map = useMapEvents({
+      click: (e) => {
+        const { lat, lng } = e.latlng;
+        setCurrentPath(prevPath => [...prevPath, [lat, lng]]);
+      }
+    });
+
+    // Store the map reference
+    React.useEffect(() => {
+      if (map) {
+        mapRef.current = map;
+      }
+    }, [map]);
+
+    return null;
+  };
+
   return (
     <div className="master-container">
       <div className="map-section">
@@ -454,6 +473,7 @@ const MapComponent = () => {
             selectedIncidentType={selectedIncidentType}
           />
           <MapControls />
+          <MapEvents />
           {currentPath.length > 0 && (
             <>
               {renderIncidentMarkers(currentPath, selectedIncidentType, true)}
