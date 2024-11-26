@@ -5,6 +5,7 @@ import detourboth from '../svg/detour-bothway.png';
 import detouroneway from '../svg/detour-rightonly.png';
 import publiceventPng from '../svg/publicevent.png';
 import closedRoadPng from '../svg/closedroad.png';
+import governmentPng from '../svg/government.png';
 
 export const INCIDENT_TYPES = {
   COLLISION: {
@@ -41,13 +42,19 @@ export const INCIDENT_TYPES = {
     name: 'Detour: One Way',
     symbol: detouroneway,
     description: 'One-way alternative route',
-    color: '#34495e'
+    color: '#ff6600'
   },
   DETOUR_TWO_WAY: {
     name: 'Detour: Two Way',
     symbol: detourboth,
     description: 'Two-way alternative route',
     color: '#45e600'
+  },
+  GOVERNMENT_WORK: {
+    name: 'Government Work',
+    symbol: governmentPng,
+    description: 'Official government construction or maintenance',
+    color: '#9b59b6'
   }
 };
 

@@ -271,6 +271,35 @@ kbd {
   color: #5c9aff !important;
 }
 
+/* Logout Button */
+.logout-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  background-color: var(--control-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-color);
+  font-size: var(--font-size-md);
+  transition: all 0.2s ease;
+  box-shadow: var(--control-shadow);
+}
+
+.logout-button:hover {
+  background-color: var(--hover-bg);
+  transform: translateY(-1px);
+}
+
+.logout-button i {
+  font-size: 20px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .master-container {

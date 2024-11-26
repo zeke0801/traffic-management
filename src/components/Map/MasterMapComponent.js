@@ -13,6 +13,8 @@ import detourRightOnly from '../../svg/detour-rightonly.png';
 import detourBothWay from '../../svg/detour-bothway.png';
 import publicEventPng from '../../svg/publicevent.png';
 import closedRoadPng from '../../svg/closedroad.png';
+import governmentPng from '../../svg/government.png';
+import { useNavigate } from 'react-router-dom';
 
 const MapControls = () => {
   const [isSpacePressed, setIsSpacePressed] = useState(false);
@@ -175,6 +177,15 @@ const roadClosureIcon = () => new L.DivIcon({
   iconAnchor: [0, 0]
 });
 
+const governmentWorkIcon = () => new L.DivIcon({
+  html: `<div style="transform: translate(-50%, -50%);">
+    <img src="${governmentPng}" alt="government work" style="width: 32px; height: 32px;" />
+  </div>`,
+  className: 'government-work-icon',
+  iconSize: [32, 32],
+  iconAnchor: [0, 0]
+});
+
 const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(false);
 
@@ -208,6 +219,7 @@ const ThemeToggle = () => {
 };
 
 const MapComponent = () => {
+  const navigate = useNavigate();
   const mapRef = useRef(null);
   const [incidents, setIncidents] = useState([]);
   const [error, setError] = useState(null);
@@ -340,6 +352,13 @@ const MapComponent = () => {
     }
   };
 
+  const handleLogout = () => {
+    // Clear any auth tokens or user data from localStorage
+    localStorage.removeItem('token');
+    // Navigate to login page
+    navigate('/login');
+  };
+
   const renderIncidentMarkers = (coordinates, type, isDrawing = false) => {
     if (hiddenIncidentTypes.has(type)) return null;
     const color = isDrawing ? '#3388ff' : INCIDENT_TYPES[type]?.color || '#ffffff00';
@@ -372,6 +391,13 @@ const MapComponent = () => {
             dashArray: '5, 10',
             weight: 4
           };
+          case 'GOVERNMENT_WORK':
+            return {
+              ...baseOptions,
+              opacity: 0,
+              dashArray: '5, 10',
+              weight: 4
+            };
         default:
           return baseOptions;
       }
@@ -428,14 +454,24 @@ const MapComponent = () => {
 
   const getMarkerIcon = (type) => {
     switch(type) {
-      case 'COLLISION': return collisionIcon;
-      case 'CONSTRUCTION': return constructionIcon;
-      case 'FLOODING': return floodingIcon;
-      case 'DETOUR_ONE_WAY': return detourOneWayIcon;
-      case 'DETOUR_TWO_WAY': return detourTwoWayIcon;
-      case 'PUBLIC_EVENT': return publicEventIcon;
-      case 'ROAD_CLOSURE': return roadClosureIcon;
-      default: return null;
+      case 'COLLISION':
+        return collisionIcon;
+      case 'CONSTRUCTION':
+        return constructionIcon;
+      case 'FLOODING':
+        return floodingIcon;
+      case 'DETOUR_ONE_WAY':
+        return detourOneWayIcon;
+      case 'DETOUR_TWO_WAY':
+        return detourTwoWayIcon;
+      case 'PUBLIC_EVENT':
+        return publicEventIcon;
+      case 'ROAD_CLOSURE':
+        return roadClosureIcon;
+      case 'GOVERNMENT_WORK':
+        return governmentWorkIcon;
+      default:
+        return null;
     }
   };
 
@@ -547,6 +583,10 @@ const MapComponent = () => {
         </div>
       </div>
       <div className="incidents-section">
+        <button className="logout-button" onClick={handleLogout}>
+          <i className="material-icons">logout</i>
+          Logout
+        </button>
         <Clock />
         <IncidentPanel
           incidents={incidents.filter(inc => !hiddenIncidentTypes.has(inc.type))}

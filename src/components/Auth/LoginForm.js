@@ -82,8 +82,12 @@ function LoginForm(props) {
           </form>
           <div className="social-follow">
             <span>FOLLOW</span>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.facebook.com/NagaCityGovernment" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-facebook"></i>
+            </a>
+            <span style={{ marginLeft: '20px' }}>|</span>
+            <a href="/credits" style={{ textDecoration: 'none', color: '#4a90e2', marginLeft: '20px' }}>
+              Credits
             </a>
           </div>
         </div>
