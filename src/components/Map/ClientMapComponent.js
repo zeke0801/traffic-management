@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Polyline, CircleMarker, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
+import { MapContainer, TileLayer, Polyline, CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MasterMapComponent.css';
 import { fetchIncidents } from '../../services/api';
-import { INCIDENT_TYPES } from '../../constants/incidentTypes';
 
 function ClientMapComponent() {
   const [incidents, setIncidents] = useState([]);
   const [error, setError] = useState(null);
-  const [selectedIncident, setSelectedIncident] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,10 +26,10 @@ function ClientMapComponent() {
   }, []);
 
   const renderIncidentMarkers = (coordinates, type) => {
-    const color = INCIDENT_TYPES[type]?.color || '#3388ff';
+    const color = '#3388ff';
     const getPathOptions = (type) => {
       const baseOptions = {
-        color: INCIDENT_TYPES[type]?.color || color,
+        color: color,
         weight: 5,
         opacity: 1
       };
