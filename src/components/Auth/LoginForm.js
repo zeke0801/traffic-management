@@ -12,24 +12,16 @@ function LoginForm(props) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // Convert credentials to match exactly what's in MongoDB
-      const credentials = {
-        username: username.trim().toLowerCase(),
-        password: password.trim()
-      };
-      
-      console.log('Attempting login with:', credentials);
+      console.log('Attempting login with:', { username, password });
       const response = await fetch('https://traffic-management-hvn8.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify(credentials),
-        credentials: 'include' // Include cookies if the backend uses sessions
+        body: JSON.stringify({ username, password }),
       });
 
-      console.log('Response status:', response.status);
       const data = await response.json();
       console.log('Login response:', data);
 
@@ -46,7 +38,7 @@ function LoginForm(props) {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Login failed. Please check your connection and try again.');
+      setError('Login failed. Please try again.');
     }
   };
 
