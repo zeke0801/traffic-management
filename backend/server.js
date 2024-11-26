@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -52,7 +52,14 @@ const incidentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ['admin', 'user'], default: 'user' }
+});
+
 const Incident = mongoose.model('Incident', incidentSchema);
+const User = mongoose.model('User', userSchema);
 
 // Routes
 app.get('/api/incidents', async (req, res) => {
@@ -87,6 +94,60 @@ app.delete('/api/incidents/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting incident:', error);
     res.status(500).json({ error: 'Error deleting incident' });
+  }
+});
+
+// Authentication endpoints
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+    
+    // Create new user
+    const user = new User({
+      username,
+      password, // In production, hash the password before saving
+      role: 'admin' // For initial setup, create as admin
+    });
+    
+    await user.save();
+    res.status(201).json({ message: 'User created successfully' });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Error creating user' });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    // Find user
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    // Check password (in production, compare hashed passwords)
+    if (user.password !== password) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    res.json({ 
+      message: 'Login successful',
+      user: {
+        username: user.username,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Error during login' });
   }
 });
 
