@@ -37,10 +37,6 @@ function LoginForm(props) {
     }
   };
 
-  const handleClientView = () => {
-    navigate('/client');
-  };
-
   return (
     <div className="welcome-screen">
       <div className="login-container">
@@ -68,20 +64,12 @@ function LoginForm(props) {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <div className="button-container">
-              <button type="submit" className="login-button">Admin Login</button>
-              <button type="button" onClick={handleClientView} className="client-button">Client Viewing</button>
-            </div>
+            <button type="submit" className="login-button">
+              Login
+            </button>
           </form>
-          <div className="social-follow">
-            <span>FOLLOW</span>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-facebook"></i>
-            </a>
-          </div>
         </div>
       </div>
-      <div className="footer-text">experimental - zeke</div>
     </div>
   );
 }
