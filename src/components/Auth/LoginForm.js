@@ -12,15 +12,18 @@ function LoginForm(props) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      console.log('Attempting login with:', { username, password });
       const response = await fetch('https://traffic-management-hvn8.onrender.com/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
+      console.log('Login response:', data);
 
       if (response.ok && data.success) {
         // Store user info in localStorage
@@ -30,9 +33,11 @@ function LoginForm(props) {
         const route = data.user.role === 'admin' ? props.routes.master : props.routes.client;
         navigate(route);
       } else {
-        setError(data.message || 'Invalid credentials');
+        setError(data.message || 'Invalid credentials. Please try again.');
+        console.error('Login failed:', data);
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
     }
   };
