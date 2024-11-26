@@ -25,15 +25,17 @@ function LoginForm(props) {
       const data = await response.json();
       console.log('Login response:', data);
 
-      if (response.ok && data.success) {
+      if (response.ok && data.user) {  
         // Store user info in localStorage
         localStorage.setItem('user', JSON.stringify(data.user));
         
         // Use the dynamic routes passed from App.js
         const route = data.user.role === 'admin' ? props.routes.master : props.routes.client;
+        console.log('Navigating to route:', route);
         navigate(route);
       } else {
-        setError(data.message || 'Invalid credentials. Please try again.');
+        const errorMessage = data.message || 'Invalid credentials. Please try again.';
+        setError(errorMessage);
         console.error('Login failed:', data);
       }
     } catch (err) {
