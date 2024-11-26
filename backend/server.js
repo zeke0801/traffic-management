@@ -46,8 +46,11 @@ app.get('/health', (req, res) => {
 // MongoDB Schema
 const incidentSchema = new mongoose.Schema({
   type: String,
+  name: String,
+  color: String,
   coordinates: [[Number]], // Array of [lat, lng] pairs
   description: String,
+  status: { type: String, default: 'ACTIVE' },
   expiryTime: { type: Date, required: false },
   createdAt: { type: Date, default: Date.now }
 });
@@ -79,11 +82,25 @@ app.post('/api/incidents', async (req, res) => {
       ...req.body,
       expiryTime: req.body.expiryTime || new Date(Date.now() + 24 * 60 * 60 * 1000) // Default 24 hours if not provided
     });
-    await incident.save();
-    res.status(201).json(incident);
+    const savedIncident = await incident.save();
+    console.log('Saved incident:', savedIncident);
+    res.status(201).json(savedIncident);
   } catch (error) {
     console.error('Error creating incident:', error);
     res.status(400).json({ error: 'Error creating incident', details: error.message });
+  }
+});
+
+app.get('/api/incidents/:id', async (req, res) => {
+  try {
+    const incident = await Incident.findById(req.params.id);
+    if (!incident) {
+      return res.status(404).json({ error: 'Incident not found' });
+    }
+    res.json(incident);
+  } catch (error) {
+    console.error('Error fetching incident:', error);
+    res.status(500).json({ error: 'Error fetching incident' });
   }
 });
 

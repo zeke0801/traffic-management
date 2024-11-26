@@ -260,8 +260,8 @@ const MapComponent = () => {
       return;
     }
 
-    if (!selectedIncidentType) {
-      setError('Please select an incident type');
+    if (!selectedIncidentType || !INCIDENT_TYPES[selectedIncidentType]) {
+      setError('Please select a valid incident type');
       return;
     }
 
@@ -272,7 +272,9 @@ const MapComponent = () => {
         type: selectedIncidentType,
         coordinates: currentPath,
         description: description || 'No description provided',
-        status: 'ACTIVE'
+        status: 'ACTIVE',
+        name: INCIDENT_TYPES[selectedIncidentType].name,
+        color: INCIDENT_TYPES[selectedIncidentType].color
       };
 
       await createIncident(incidentData);
