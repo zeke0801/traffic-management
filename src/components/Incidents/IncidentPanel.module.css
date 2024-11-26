@@ -76,13 +76,14 @@
   flex: 1;
   overflow-y: auto;
   background-color: rgba(40, 40, 40, 0.95);
-  margin-bottom: 1.5rem;
+  margin-bottom: .5rem;
+  margin-right: .5rem;
 }
 
 .reportsGrid {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0rem;
 }
 
 .reportItem {
