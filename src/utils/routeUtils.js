@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 // Function to generate a daily hash based on a secret and the current date
 const generateDailyHash = (prefix) => {
   const date = new Date().toISOString().split('T')[0]; // Gets current date in YYYY-MM-DD format
