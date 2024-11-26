@@ -1,14 +1,8 @@
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Credit.css';
 
 function Credit() {
-  const navigate = useNavigate();
-
-  const handleBack = () => {
-    navigate(-1); // Go back to previous page
-  };
-
   return (
     <div className="credit-screen">
       <div className="credit-container">
