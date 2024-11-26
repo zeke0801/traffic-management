@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MasterMapComponent from './components/Map/MasterMapComponent';
 import ClientMapComponent from './components/Map/ClientMapComponent';
 import LoginForm from './components/Auth/LoginForm';
-import { getRoutes } from './utils/routeUtils';
+import { getRoutes, isValidPath } from './utils/routeUtils';
 import './App.css';
 
 function App() {

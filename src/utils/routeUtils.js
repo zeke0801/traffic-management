@@ -28,3 +28,10 @@ export const getRoutes = () => {
     client: `/${clientHash}`,
   };
 };
+
+// Validate if a given path matches today's valid paths
+export const isValidPath = (path) => {
+  const routes = getRoutes();
+  const strippedPath = path.startsWith('/') ? path : `/${path}`;
+  return Object.values(routes).includes(strippedPath);
+};
