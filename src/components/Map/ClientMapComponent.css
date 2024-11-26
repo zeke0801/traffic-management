@@ -1,0 +1,298 @@
+:root {
+  /* Dark theme variables */
+  --bg-color: #1a1a1a;
+  --text-color: #e1e1e1;
+  --text-color-secondary: #b0b0b0;
+  --text-color-inverse: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.15);
+  --control-bg: rgba(40, 40, 40, 0.95);
+  --control-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --hover-bg: #2c2c2c;
+  
+  /* Button colors */
+  --primary-color: #5c9aff;
+  --primary-color-hover: #4285f4;
+  --success-color: #40c463;
+  --success-color-hover: #34a853;
+  --danger-color: #f85149;
+  --danger-color-hover: #ea4335;
+  --warning-color: #ffd33d;
+  --warning-color-hover: #fbbc05;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  
+  /* Font sizes */
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+}
+
+/* Layout */
+.master-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  background-color: var(--bg-color);
+}
+
+.map-section {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  width: 75%;
+}
+
+.incidents-section {
+  width: 25%;
+  padding: .5rem;
+  background-color: var(--control-bg);
+  box-shadow: var(--control-shadow);
+  overflow-y: auto;
+  z-index: 3;
+}
+
+/* Incident Reporting */
+.incident-reporting {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  z-index: 1000;
+  background-color: var(--control-bg);
+  padding: .5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  width: 320px;
+  border: 1px solid var(--border-color);
+}
+
+.incident-reporting h3 {
+  color: var(--text-color);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-md);
+  font-weight: 600;
+}
+
+.incident-reporting select,
+.incident-reporting input,
+.incident-reporting textarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-size: var(--font-size-sm);
+}
+
+.incident-reporting select:focus,
+.incident-reporting input:focus,
+.incident-reporting textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
+}
+
+.duration-inputs {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.duration-input {
+  width: 100px !important;
+}
+
+.duration-unit-select {
+  flex: 1;
+}
+
+.specific-time-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.time-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.time-input-group label {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-secondary);
+}
+
+.no-expiry-note {
+  padding: var(--spacing-sm);
+  background-color: var(--hover-bg);
+  border-radius: 4px;
+  color: var(--text-color-secondary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.control-button {
+  width: 100%;
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.control-button:hover:not(:disabled) {
+  background-color: var(--primary-color-hover);
+}
+
+.control-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  width: 100%;
+  margin-top: var(--spacing-xs);
+  background-color: var(--danger-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: var(--danger-color-hover);
+}
+
+/* Form Controls */
+select, input, textarea {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: var(--font-size-sm);
+}
+
+/* Time Display */
+.datetime-display {
+  font-weight: bold;
+  padding: 0rem .5rem .5rem 0;
+  text-align: left;
+  border-radius: 4px;
+  background-color: rgba(40, 40, 40, 0.95);
+  color: var(--text-color-secondary);
+  font-size: 0.9em;
+}
+
+.datetime-display .clock,
+.datetime-display .date {
+  margin: 4px 0;
+}
+
+/* Map Instructions */
+.map-instructions {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--control-bg);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 4px;
+  font-size: var(--font-size-sm);
+  box-shadow: var(--control-shadow);
+  z-index: 1000;
+}
+
+kbd {
+  background-color: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 0.9em;
+}
+
+/* Leaflet Map Controls Dark Mode */
+.leaflet-control-container .leaflet-control {
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  color: #e1e1e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: #2c2c2c !important;
+  color: #ffffff !important;
+}
+
+.leaflet-control-zoom-in {
+  border-bottom: none !important;
+}
+
+.leaflet-bar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.leaflet-bar a {
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  color: #e1e1e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: #2c2c2c !important;
+  color: #ffffff !important;
+}
+
+.leaflet-container .leaflet-control-attribution {
+  background-color: rgba(40, 40, 40, 0.95) !important;
+  color: #b0b0b0 !important;
+}
+
+.leaflet-container .leaflet-control-attribution a {
+  color: #5c9aff !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .master-container {
+    flex-direction: column;
+  }
+
+  .map-section {
+    height: 80vh;
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .incidents-section {
+    width: 100%;
+    height: 100%;
+  }
+
+  .incident-reporting {
+    top: var(--spacing-md);
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    max-width: none;
+  }
+
+}
