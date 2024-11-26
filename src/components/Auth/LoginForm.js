@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import nagaImage from '../../svg/naga.jpg';
 //LoginForm css is within app.css
 
-function LoginForm() {
+function LoginForm(props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -11,32 +11,18 @@ function LoginForm() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-
     try {
-      const response = await fetch('http://localhost:3001/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed');
-        return;
+      const response = await login(username, password);
+      if (response.success) {
+        const userType = response.userType;
+        // Use the dynamic routes passed from App.js
+        const route = userType === 'admin' ? props.routes.master : props.routes.client;
+        navigate(route);
+      } else {
+        setError('Invalid credentials');
       }
-
-      // Store user info in localStorage
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      // Redirect to master view
-      navigate('/master');
     } catch (err) {
-      setError('Failed to connect to server');
-      console.error('Login error:', err);
+      setError('Login failed. Please try again.');
     }
   };
 
