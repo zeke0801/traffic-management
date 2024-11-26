@@ -59,15 +59,15 @@ const MapControls = () => {
   return null;
 };
 
-const MapEvents = () => {
-  const map = useMapEvents({
-  });
+const MapEvents = ({ onMapReady }) => {
+  const map = useMapEvents({});
 
-  // Store the map reference
+  // Store the map reference when the map is ready
   React.useEffect(() => {
     if (map) {
+      onMapReady(map);
     }
-  }, [map]);
+  }, [map, onMapReady]);
 
   return null;
 };
@@ -265,6 +265,10 @@ const MapComponent = () => {
     }
   };
 
+  const handleMapReady = (map) => {
+    mapRef.current = map;
+  };
+
   const renderIncidentMarkers = (coordinates, type) => {
     if (hiddenIncidentTypes.has(type)) return null;
     const color = INCIDENT_TYPES[type]?.color || '#ffffff00';
@@ -383,7 +387,7 @@ const MapComponent = () => {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           <MapControls />
-          <MapEvents />
+          <MapEvents onMapReady={handleMapReady} />
           {incidents.map((incident) => (
             <React.Fragment key={incident._id}>
               {renderIncidentMarkers(incident.coordinates, incident.type)}
