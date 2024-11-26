@@ -214,11 +214,11 @@ const MapComponent = () => {
   const [selectedIncidentType, setSelectedIncidentType] = useState('');
   const [description, setDescription] = useState('');
   const [selectedIncident, setSelectedIncident] = useState(null);
-  const [duration, setDuration] = useState(1);
-  const [durationUnit, setDurationUnit] = useState(DURATION_UNITS.HOURS);
-  const [expiryType, setExpiryType] = useState('duration');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  //const [duration, setDuration] = useState(1);
+  //const [durationUnit, setDurationUnit] = useState(DURATION_UNITS.HOURS);
+ //const [expiryType, setExpiryType] = useState('duration');
+  //const [startDate, setStartDate] = useState('');
+  //const [endDate, setEndDate] = useState('');
   const [hiddenIncidentTypes, setHiddenIncidentTypes] = useState(new Set());
 
   const toggleIncidentType = (type) => {
@@ -274,7 +274,7 @@ const MapComponent = () => {
       setError(null);
 
       let startTime, expiryTime;
-
+      {/* 
       if (expiryType === 'duration') {
         if (!duration || duration <= 0) {
           setError('Please set a valid duration');
@@ -300,6 +300,7 @@ const MapComponent = () => {
         setDuration(durationHours);
         setDurationUnit(DURATION_UNITS.HOURS);
       }
+        */}
 
       const incidentData = {
         type: selectedIncidentType,
@@ -307,8 +308,8 @@ const MapComponent = () => {
         description: description || 'No description provided',
         startTime: startTime.toISOString(),
         expiryTime: expiryTime.toISOString(),
-        duration: duration,
-        durationUnit: durationUnit
+        //duration: duration,
+        //durationUnit: durationUnit
       };
 
       await createIncident(incidentData);
@@ -317,9 +318,9 @@ const MapComponent = () => {
       setCurrentPath([]);
       setDescription('');
       setSelectedIncidentType('');
-      setDuration(1);
-      setDurationUnit(DURATION_UNITS.HOURS);
-      setExpiryType('duration');
+      //setDuration(1);
+      //setDurationUnit(DURATION_UNITS.HOURS);
+      //setExpiryType('duration');
       setStartDate('');
       setEndDate('');
     } catch (err) {
@@ -332,9 +333,9 @@ const MapComponent = () => {
     setCurrentPath([]);
     setSelectedIncidentType('');
     setDescription('');
-    setDuration(1);
-    setDurationUnit(DURATION_UNITS.HOURS);
-    setExpiryType('duration');
+    //setDuration(1);
+    //setDurationUnit(DURATION_UNITS.HOURS);
+    //setExpiryType('duration');
     setStartDate('');
     setEndDate('');
   };
@@ -509,16 +510,19 @@ const MapComponent = () => {
               className="description-input"
             />
 
-            <div className="expiry-controls">
+            {/* <div className="expiry-controls">
+                  
               <select 
                 value={expiryType} 
                 onChange={(e) => setExpiryType(e.target.value)}
                 className="expiry-type-select"
               >
+             
                 <option value="duration">Duration</option>
                 <option value="specific">Specific Time</option>
                 <option value="no_expiry">No Specific Time</option>
               </select>
+              
 
               {expiryType === 'duration' ? (
                 <div className="duration-inputs">
@@ -565,6 +569,7 @@ const MapComponent = () => {
                 </div>
               )}
             </div>
+            */}
 
             <button
               onClick={handleDrawingComplete}

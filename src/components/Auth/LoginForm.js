@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import nagaImage from '../../svg/naga.jpg';
+//LoginForm css is within app.css
 
 function LoginForm() {
   const [username, setUsername] = useState('');
@@ -39,6 +40,10 @@ function LoginForm() {
     }
   };
 
+  const handleClientView = () => {
+    navigate('/client');
+  };
+
   return (
     <div className="welcome-screen">
       <div className="login-container">
@@ -66,7 +71,10 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <button type="submit" className="login-button">Login</button>
+            <div className="button-container">
+              <button type="submit" className="login-button">Admin Login</button>
+              <button type="button" onClick={handleClientView} className="client-button">Client Viewing</button>
+            </div>
           </form>
           <div className="social-follow">
             <span>FOLLOW</span>

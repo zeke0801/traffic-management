@@ -188,7 +188,6 @@ body {
   transform: scale(0) rotate(0deg) translate(-50%, -50%);
   animation: cube 12s ease-in forwards infinite;
 }
-undefined
 .background li:nth-child(0) {
   animation-delay: 0s;
   left: 56vw;
@@ -497,23 +496,44 @@ undefined
   color: #7e00c25d;
 }
 
-.login-button {
-  margin-top: .5rem;
-  width: 20%;
+.button-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.login-button,
+.client-button {
+  flex: 1;
   padding: .5rem;
   border: none;
-  background: #8e00c2;
-  color: white;
   font-size: .7rem;
   font-weight: bold;
   cursor: pointer;
   transition: transform 0.2s, background-color 0.2s;
 }
 
+.login-button {
+  background-color: #8e00c2;
+  color: white;
+}
+
+.client-button {
+  background-color: #2c3e50;
+  color: white;
+}
+
 .login-button:hover {
   color: #8e00c2;
   background: #e8e7e7;
   border: 0.1rem solid #8e00c2;
+}
+
+.client-button:hover {
+  color: #2c3e50;
+  background: #e8e7e7;
+  border: 0.1rem solid #2c3e50;
 }
 
 @media (max-width: 768px) {

@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MasterMapComponent from './components/Map/MasterMapComponent';
-import './App.css';
+import ClientMapComponent from './components/Map/ClientMapComponent';
 import LoginForm from './components/Auth/LoginForm';
+import './App.css';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginForm />} />
         <Route path="/master" element={<MasterMapComponent />} />
+        <Route path="/client" element={<ClientMapComponent />} />
       </Routes>
     </Router>
   );
