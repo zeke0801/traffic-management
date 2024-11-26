@@ -12,14 +12,25 @@ function LoginForm(props) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await login(username, password);
-      if (response.success) {
-        const userType = response.userType;
+      const response = await fetch('https://traffic-management-hvn8.onrender.com/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Store user info in localStorage
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
         // Use the dynamic routes passed from App.js
-        const route = userType === 'admin' ? props.routes.master : props.routes.client;
+        const route = data.user.role === 'admin' ? props.routes.master : props.routes.client;
         navigate(route);
       } else {
-        setError('Invalid credentials');
+        setError(data.message || 'Invalid credentials');
       }
     } catch (err) {
       setError('Login failed. Please try again.');
