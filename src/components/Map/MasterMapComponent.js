@@ -463,10 +463,11 @@ const MapComponent = () => {
             </select>
 
             <input
+              maxLength={100}
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter description"
+              placeholder="Add Key and Concise Information"
               className="description-input"
             />
 

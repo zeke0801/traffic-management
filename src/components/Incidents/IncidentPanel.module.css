@@ -76,6 +76,7 @@
   flex: 1;
   overflow-y: auto;
   background-color: rgba(40, 40, 40, 0.95);
+  margin-bottom: 1.5rem;
 }
 
 .reportsGrid {
@@ -85,33 +86,39 @@
 }
 
 .reportItem {
+  background-color: var(--control-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
   padding: 0.75rem;
-  border-radius: 4px;
-  background-color: #2c2c2c;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 0.75rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  max-width: 100%;
 }
 
 .reportItem:hover {
-  background-color: #363636;
+  background-color: var(--hover-bg);
 }
 
 .reportItem.selected {
-  background-color: #363636;
-  border-color: #5c9aff;
+  background-color: var(--hover-bg);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--primary-color);
 }
 
 .reportHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 0.5rem;
 }
 
 .reportType {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 600;
-  color: #e1e1e1;
+  font-size: 0.9rem;
 }
 
 .reportIcon {
@@ -121,29 +128,34 @@
 }
 
 .reportDetails {
+  margin-top: 0.5rem;
   font-size: 0.9rem;
-  color: #b0b0b0;
-  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.4;
 }
 
 .reportTime {
+  margin-top: 0.5rem;
   font-size: 0.8rem;
-  color: #b0b0b0;
+  color: var(--secondary-text);
 }
 
 .deleteButton {
-  padding: 0.25rem 0.5rem;
-  border: none;
-  border-radius: 4px;
-  background-color: #f85149;
+  background-color: #ff4444;
   color: white;
-  cursor: pointer;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
   font-size: 0.8rem;
-  transition: background-color 0.2s;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .deleteButton:hover {
-  background-color: #ea4335;
+  background-color: #cc0000;
 }
 
 /* Scrollbar Styling */
