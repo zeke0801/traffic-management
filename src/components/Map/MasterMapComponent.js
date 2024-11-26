@@ -342,7 +342,7 @@ const MapComponent = () => {
 
   const renderIncidentMarkers = (coordinates, type, isDrawing = false) => {
     if (hiddenIncidentTypes.has(type)) return null;
-    const color = isDrawing ? '#3388ff' : INCIDENT_TYPES[type]?.color || '#3388ff';
+    const color = isDrawing ? '#3388ff' : INCIDENT_TYPES[type]?.color || '#ffffff00';
     const getPathOptions = (type) => {
       const baseOptions = {
         color: INCIDENT_TYPES[type]?.color || color,
@@ -442,8 +442,10 @@ const MapComponent = () => {
   const MapEvents = () => {
     const map = useMapEvents({
       click: (e) => {
-        const { lat, lng } = e.latlng;
-        setCurrentPath(prevPath => [...prevPath, [lat, lng]]);
+        if (selectedIncidentType) {
+          const { lat, lng } = e.latlng;
+          setCurrentPath(prevPath => [...prevPath, [lat, lng]]);
+        }
       }
     });
 
