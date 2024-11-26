@@ -213,7 +213,7 @@ const MapComponent = () => {
   const [currentPath, setCurrentPath] = useState([]);
   const [selectedIncidentType, setSelectedIncidentType] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedIncident, setSelectedIncident] = useState(null);
+  const [selectedIncidentId, setSelectedIncidentId] = useState(null);
   const [hiddenIncidentTypes, setHiddenIncidentTypes] = useState(new Set());
 
   const toggleIncidentType = (type) => {
@@ -306,10 +306,29 @@ const MapComponent = () => {
       await deleteIncident(incidentId);
       const updatedIncidents = await fetchIncidents();
       setIncidents(updatedIncidents);
-      setSelectedIncident(null);
+      setSelectedIncidentId(null);
     } catch (err) {
       setError('Failed to delete incident. Please try again.');
       console.error('Error deleting incident:', err);
+    }
+  };
+
+  const handleIncidentSelect = (incidentId) => {
+    setSelectedIncidentId(incidentId);
+    
+    // Find the selected incident
+    const selectedIncident = incidents.find(incident => incident._id === incidentId);
+    if (selectedIncident && selectedIncident.coordinates.length > 0) {
+      // Create bounds from the incident coordinates
+      const bounds = L.latLngBounds(selectedIncident.coordinates);
+      
+      // Fit the map to these bounds with some padding
+      mapRef.current.fitBounds(bounds, {
+        padding: [50, 50],
+        maxZoom: 18,
+        animate: true,
+        duration: 1
+      });
     }
   };
 
@@ -502,8 +521,8 @@ const MapComponent = () => {
         <Clock />
         <IncidentPanel
           incidents={incidents.filter(inc => !hiddenIncidentTypes.has(inc.type))}
-          selectedIncident={selectedIncident}
-          onSelectIncident={setSelectedIncident}
+          selectedIncidentId={selectedIncidentId}
+          onSelectIncident={handleIncidentSelect}
           onDeleteIncident={handleDeleteIncident}
           hiddenIncidentTypes={hiddenIncidentTypes}
           onToggleIncidentType={toggleIncidentType}

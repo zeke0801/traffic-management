@@ -4,7 +4,7 @@ import styles from './IncidentPanel.module.css';
 
 const IncidentPanel = ({ 
   incidents, 
-  selectedIncident, 
+  selectedIncidentId, 
   onSelectIncident,
   onDeleteIncident,
   hiddenIncidentTypes,
@@ -26,7 +26,7 @@ const IncidentPanel = ({
             return (
               <div 
                 key={incident._id} 
-                className={`${styles.reportItem} ${selectedIncident === incident._id ? styles.selected : ''}`}
+                className={`${styles.reportItem} ${selectedIncidentId === incident._id ? styles.selected : ''}`}
                 onClick={() => onSelectIncident(incident._id)}
               >
                 <div className={styles.reportHeader}>
