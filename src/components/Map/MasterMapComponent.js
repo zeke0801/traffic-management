@@ -333,86 +333,55 @@ const MapComponent = () => {
     }
   };
 
-  const renderIncidentMarkers = (coordinates, type, isDrawing = false) => {
+  const handleResetView = () => {
+    if (mapRef.current) {
+      mapRef.current.setView([13.6373, 123.1854], 13);
+      setSelectedIncidentId(null);
+    }
+  };
+
+  const isIncidentRecent = (incident) => {
+    const createdAt = new Date(incident.createdAt);
+    const now = new Date();
+    const hoursDiff = (now - createdAt) / (1000 * 60 * 60);
+    return hoursDiff <= 24;
+  };
+
+  const renderIncidentMarkers = (coordinates, type, isDrawing = false, incident = null) => {
     if (hiddenIncidentTypes.has(type)) return null;
+    
     const color = isDrawing ? '#3388ff' : INCIDENT_TYPES[type]?.color || '#3388ff';
     const getPathOptions = (type) => {
       const baseOptions = {
-        color: INCIDENT_TYPES[type]?.color || color,
+        color: color,
         weight: 5,
-        opacity: 1
+        opacity: 0.7
       };
-
-      switch(type) {
-        case 'COLLISION':
-          return {
-            ...baseOptions,
-            opacity: 0,
-            dashArray: '10, 10',
-            weight: 4
-          };
-        case 'CONSTRUCTION':
-          return {
-            ...baseOptions,
-            opacity: 0,
-            dashArray: '15, 10',
-            weight: 4
-          };
-        case 'FLOODING':
-          return {
-            ...baseOptions,
-            opacity: 0,
-            dashArray: '5, 10',
-            weight: 4
-          };
-        default:
-          return baseOptions;
-      }
+      return baseOptions;
     };
 
-    if (!getMarkerIcon(type)) {
-      return coordinates.map((point, index) => (
-        <CircleMarker
-          key={`${isDrawing ? 'drawing' : 'incident'}-${index}`}
-          center={point}
-          radius={1}
-          pathOptions={{
-            color: color,
-            fillColor: color,
-            fillOpacity: 0.1
-          }}
-        />
-      ));
-    }
+    // Create a custom icon div with animation class if recent
+    const createCustomIcon = (type) => {
+      const isRecent = incident && isIncidentRecent(incident);
+      const iconHtml = `<div class="custom-marker-icon ${isRecent ? 'floating-marker' : ''}" style="background-color: ${color}"></div>`;
+      return L.divIcon({
+        html: iconHtml,
+        className: 'custom-marker',
+        iconSize: [20, 20]
+      });
+    };
 
     return (
       <>
-        {coordinates.length > 1 && (
-          <>
-            <Polyline
-              positions={coordinates}
-              pathOptions={getPathOptions(type)}
-            />
-            {coordinates.map((point, index) => (
-              <CircleMarker
-                key={`connection-${index}`}
-                center={point}
-                radius={0.5}
-                pathOptions={{
-                  color: INCIDENT_TYPES[type]?.color || color,
-                  fillColor: INCIDENT_TYPES[type]?.color || color,
-                  fillOpacity: 0.5,
-                  weight: 0
-                }}
-              />
-            ))}
-          </>
-        )}
-        {coordinates.map((point, index) => (
+        <Polyline 
+          positions={coordinates} 
+          pathOptions={getPathOptions(type)} 
+        />
+        {coordinates.map((position, index) => (
           <Marker
-            key={`incident-${index}`}
-            position={point}
-            icon={getMarkerIcon(type)()}
+            key={`${index}-${position[0]}-${position[1]}`}
+            position={position}
+            icon={createCustomIcon(type)}
           />
         ))}
       </>
@@ -455,19 +424,19 @@ const MapComponent = () => {
       <div className="map-section">
         <MapContainer
           center={[13.6373, 123.1854]}
-          zoom={14}
-          zoomControl={false}
-          style={{ height: "100%", width: "100%" }}
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+          zoomControl={false}  // Disable default zoom control
         >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
           <ZoomControl position="bottomleft" />
           <ThemeToggle />
           {error && (
             <div className="error-message">{error}</div>
           )}
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
           <DrawingComponent
             onAddPoint={handleAddPoint}
             selectedIncidentType={selectedIncidentType}
@@ -479,11 +448,9 @@ const MapComponent = () => {
               {renderIncidentMarkers(currentPath, selectedIncidentType, true)}
             </>
           )}
-          {incidents.map((incident) => (
-            <React.Fragment key={incident._id}>
-              {renderIncidentMarkers(incident.coordinates, incident.type)}
-            </React.Fragment>
-          ))}
+          {incidents
+            .filter(inc => !hiddenIncidentTypes.has(inc.type))
+            .map((incident) => renderIncidentMarkers(incident.coordinates, incident.type, false, incident))}
         </MapContainer>
 
         <div className="incident-reporting">
@@ -546,6 +513,7 @@ const MapComponent = () => {
           onDeleteIncident={handleDeleteIncident}
           hiddenIncidentTypes={hiddenIncidentTypes}
           onToggleIncidentType={toggleIncidentType}
+          onResetView={handleResetView}
         />
       </div>
     </div>

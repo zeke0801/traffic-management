@@ -158,6 +158,28 @@
   background-color: #cc0000;
 }
 
+.resetViewButton {
+  width: 100%;
+  padding: 0.4rem;
+  margin-top: .5rem;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.resetViewButton:hover {
+  background-color: #cc0000;
+}
+
+.resetViewButton:active {
+  transform: translateY(1px);
+}
+
 /* Scrollbar Styling */
 .panel::-webkit-scrollbar {
   width: 8px;

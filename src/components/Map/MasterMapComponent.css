@@ -271,6 +271,41 @@ kbd {
   color: #5c9aff !important;
 }
 
+/* Custom Markers */
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-marker-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Floating Animation */
+@keyframes floatAnimation {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.floating-marker {
+  animation: floatAnimation 3s ease-in-out infinite;
+}
+
+.floating-marker .leaflet-marker-icon {
+  transform-origin: bottom center;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .master-container {

@@ -8,7 +8,8 @@ const IncidentPanel = ({
   onSelectIncident,
   onDeleteIncident,
   hiddenIncidentTypes,
-  onToggleIncidentType
+  onToggleIncidentType,
+  onResetView
 }) => {
   return (
     <div className={styles.panel}>
@@ -84,6 +85,12 @@ const IncidentPanel = ({
           ))}
         </div>
       </div>
+      <button 
+        className={styles.resetViewButton}
+        onClick={onResetView}
+      >
+        Reset View
+      </button>
     </div>
   );
 };
