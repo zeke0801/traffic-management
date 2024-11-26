@@ -321,8 +321,8 @@ const MapComponent = () => {
       //setDuration(1);
       //setDurationUnit(DURATION_UNITS.HOURS);
       //setExpiryType('duration');
-      setStartDate('');
-      setEndDate('');
+      //setStartDate('');
+      //setEndDate('');
     } catch (err) {
       console.error('Error creating incident:', err);
       setError('Failed to create incident. Please try again.');
@@ -336,8 +336,8 @@ const MapComponent = () => {
     //setDuration(1);
     //setDurationUnit(DURATION_UNITS.HOURS);
     //setExpiryType('duration');
-    setStartDate('');
-    setEndDate('');
+    //setStartDate('');
+    //setEndDate('');
   };
 
   const handleDeleteIncident = async (incidentId) => {
