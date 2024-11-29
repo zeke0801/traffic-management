@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import nagaImage from '../../svg/naga.jpg';
+import LoadingPopup from '../Common/LoadingPopup';
 //LoginForm css is within app.css
 
 function LoginForm(props) {
@@ -9,6 +10,7 @@ function LoginForm(props) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isWakingServer, setIsWakingServer] = useState(false);
+  const [popupError, setPopupError] = useState('');
   const navigate = useNavigate();
 
   const wakeupServer = async () => {
@@ -39,13 +41,17 @@ function LoginForm(props) {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setPopupError('');
 
     try {
       // Check server activity before login
       await checkServerActivity();
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        setPopupError('Technical Issue, Try again later.');
+      }, 15000); // 15 second timeout
 
       const response = await fetch('https://traffic-management-hvn8.onrender.com/api/auth/login', {
         method: 'POST',
@@ -72,7 +78,7 @@ function LoginForm(props) {
       }
     } catch (err) {
       if (err.name === 'AbortError') {
-        setError('Login request timed out. The server might be starting up, please try again.');
+        setPopupError('Technical Issue, Try again later.');
       } else {
         setError('Login failed. Please try again.');
       }
@@ -88,6 +94,11 @@ function LoginForm(props) {
 
   return (
     <div className="welcome-screen">
+      <LoadingPopup 
+        isLoading={isLoading || isWakingServer} 
+        error={popupError}
+        message={isWakingServer ? "Waking up server..." : "Logging in..."}
+      />
       <div className="login-container">
         <div className="login-left">
           <img src={nagaImage} alt="Traffic Management System" className="login-image" />
