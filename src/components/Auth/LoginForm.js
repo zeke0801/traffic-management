@@ -88,7 +88,10 @@ function LoginForm(props) {
     }
   };
 
-  const handleClientView = () => {
+  const handleClientView = async () => {
+    setIsWakingServer(true);
+    await checkServerActivity();
+    setIsWakingServer(false);
     navigate('/client');
   };
 
